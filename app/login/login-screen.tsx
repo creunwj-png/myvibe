@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Loader2, MessageCircle, Smartphone, X } from "lucide-react";
 
@@ -85,7 +86,13 @@ export function LoginScreen({
       <main className="flex flex-1 flex-col bg-white">
         <div className="mx-auto flex w-full max-w-[480px] flex-1 flex-col px-4">
           <header className="flex h-14 shrink-0 items-center">
-            <span className="text-[22px] font-bold text-[#1e1e1e]">톡캐치</span>
+            <Link
+              href="/home"
+              aria-label="톡캐치 홈"
+              className="text-[22px] font-bold text-[#1e1e1e]"
+            >
+              톡캐치
+            </Link>
           </header>
           <p className="mb-2 mt-1 text-[12px] text-[#bbbbbb]">
             시점별 권유 (인라인 배너)

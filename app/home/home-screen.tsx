@@ -103,9 +103,13 @@ export function HomeScreen({
           </header>
         ) : (
           <header className="flex h-14 shrink-0 items-center justify-between pl-4 pr-2">
-            <span className="text-[22px] font-bold leading-none text-[#1e1e1e]">
+            <Link
+              href="/home"
+              aria-label="톡캐치 홈"
+              className="rounded-md text-[22px] font-bold leading-none text-[#1e1e1e]"
+            >
               톡캐치
-            </span>
+            </Link>
             <div className="flex items-center">
               {!empty ? (
                 <button
