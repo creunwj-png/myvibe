@@ -2,9 +2,24 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, MoreVertical, Plus, Search, Share2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import {
+  ArrowLeft,
+  MoreVertical,
+  Pencil,
+  Plus,
+  Search,
+  Share2,
+  Trash2,
+} from "lucide-react";
 import { ProjectIcon } from "../../lib/project-icon";
-import { memosOf, useStore, type Memo } from "../../lib/store";
+import {
+  deleteProject,
+  memosOf,
+  renameProject,
+  useStore,
+  type Memo,
+} from "../../lib/store";
 
 /**
  * S005 프로젝트 상세.
@@ -24,6 +39,37 @@ export function ProjectScreen({ name }: { name: string }) {
   useEffect(() => {
     if (searchOpen) searchRef.current?.focus();
   }, [searchOpen]);
+
+  const router = useRouter();
+  const isRealProject =
+    !isUnclassified && s.projects.some((p) => p.name === name);
+
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [renaming, setRenaming] = useState(false);
+  const [renameValue, setRenameValue] = useState(name);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const renameRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (renaming) {
+      renameRef.current?.focus();
+      renameRef.current?.select();
+    }
+  }, [renaming]);
+
+  function submitRename() {
+    const nn = renameValue.trim();
+    setRenaming(false);
+    if (nn && nn !== name) {
+      renameProject(name, nn);
+      router.replace(`/project/${encodeURIComponent(nn)}`);
+    }
+  }
+
+  function deleteNow() {
+    deleteProject(name);
+    router.push("/home");
+  }
 
   const q = query.trim();
   const visible = q ? memos.filter((m) => m.text.includes(q)) : memos;
@@ -76,28 +122,89 @@ export function ProjectScreen({ name }: { name: string }) {
             >
               <ArrowLeft size={24} />
             </Link>
-            <ProjectIcon name={name} size={20} className="ml-1 shrink-0 text-[#808080]" />
-            <h1 className="min-w-0 flex-1 truncate text-[20px] font-bold text-[#1e1e1e]">
-              {name}
-            </h1>
-            {memos.length > 0 ? (
-              <button
-                type="button"
-                onClick={() => setSearchOpen(true)}
-                aria-label="프로젝트 내 검색"
-                className="flex h-11 w-11 items-center justify-center rounded-full text-[#333333] transition-colors hover:bg-[#f8f8f8]"
-              >
-                <Search size={22} />
-              </button>
-            ) : null}
-            <button
-              type="button"
-              aria-label="프로젝트 메뉴"
-              title="이름 변경 등은 곧 추가돼요"
-              className="flex h-11 w-11 items-center justify-center rounded-full text-[#999999]"
-            >
-              <MoreVertical size={22} />
-            </button>
+
+            {renaming ? (
+              <>
+                <input
+                  ref={renameRef}
+                  value={renameValue}
+                  onChange={(e) => setRenameValue(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") submitRename();
+                    if (e.key === "Escape") setRenaming(false);
+                  }}
+                  aria-label="프로젝트 이름"
+                  className="ml-1 h-10 min-w-0 flex-1 rounded-lg border border-[#e5e5e5] px-3 text-[18px] font-bold text-[#1e1e1e] outline-none focus:border-[#333333]"
+                />
+                <button
+                  type="button"
+                  onClick={submitRename}
+                  className="flex h-9 items-center rounded-lg px-3 text-[15px] font-bold text-[#1e1e1e]"
+                >
+                  완료
+                </button>
+              </>
+            ) : (
+              <>
+                <ProjectIcon
+                  name={name}
+                  size={20}
+                  className="ml-1 shrink-0 text-[#808080]"
+                />
+                <h1 className="min-w-0 flex-1 truncate text-[20px] font-bold text-[#1e1e1e]">
+                  {name}
+                </h1>
+                {memos.length > 0 ? (
+                  <button
+                    type="button"
+                    onClick={() => setSearchOpen(true)}
+                    aria-label="프로젝트 내 검색"
+                    className="flex h-11 w-11 items-center justify-center rounded-full text-[#333333] transition-colors hover:bg-[#f8f8f8]"
+                  >
+                    <Search size={22} />
+                  </button>
+                ) : null}
+                {isRealProject ? (
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setMenuOpen((v) => !v)}
+                      aria-label="프로젝트 메뉴"
+                      className="flex h-11 w-11 items-center justify-center rounded-full text-[#333333] transition-colors hover:bg-[#f8f8f8]"
+                    >
+                      <MoreVertical size={22} />
+                    </button>
+                    {menuOpen ? (
+                      <div className="absolute right-1 top-11 z-50 w-40 overflow-hidden rounded-xl border border-[#e5e5e5] bg-white py-1 shadow-[0px_2px_6px_rgba(0,0,0,0.08)]">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setMenuOpen(false);
+                            setRenameValue(name);
+                            setRenaming(true);
+                          }}
+                          className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-[15px] text-[#333333] transition-colors hover:bg-[#f8f8f8]"
+                        >
+                          <Pencil size={16} />
+                          이름 변경
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setMenuOpen(false);
+                            setConfirmDelete(true);
+                          }}
+                          className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-[15px] text-[#e02000] transition-colors hover:bg-[#f8f8f8]"
+                        >
+                          <Trash2 size={16} />
+                          프로젝트 삭제
+                        </button>
+                      </div>
+                    ) : null}
+                  </div>
+                ) : null}
+              </>
+            )}
           </header>
         )}
 
@@ -136,6 +243,54 @@ export function ProjectScreen({ name }: { name: string }) {
           </div>
         ) : null}
       </div>
+
+      {/* 메뉴 바깥 클릭 닫기 */}
+      {menuOpen ? (
+        <button
+          type="button"
+          aria-label="닫기"
+          tabIndex={-1}
+          onClick={() => setMenuOpen(false)}
+          className="fixed inset-0 z-40 cursor-default"
+        />
+      ) : null}
+
+      {/* 프로젝트 삭제 확인 */}
+      {confirmDelete ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-8">
+          <button
+            type="button"
+            aria-label="취소"
+            tabIndex={-1}
+            onClick={() => setConfirmDelete(false)}
+            className="absolute inset-0 cursor-default bg-black/40"
+          />
+          <div className="relative w-full max-w-[320px] rounded-2xl bg-white p-5 shadow-[0px_4px_12px_rgba(0,0,0,0.12)]">
+            <p className="text-center text-[16px] font-medium text-[#222222]">
+              이 프로젝트를 삭제할까요?
+            </p>
+            <p className="mt-1.5 text-center text-[13px] leading-[1.5] text-[#666666]">
+              메모는 지워지지 않고 미분류로 옮겨져요.
+            </p>
+            <div className="mt-5 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setConfirmDelete(false)}
+                className="h-12 flex-1 rounded-xl border border-[#e5e5e5] text-[15px] font-medium text-[#333333] transition-colors hover:bg-[#f8f8f8]"
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                onClick={deleteNow}
+                className="h-12 flex-1 rounded-xl bg-[#e02000] text-[15px] font-bold text-white transition-transform duration-150 active:scale-[0.99]"
+              >
+                삭제
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </main>
   );
 }

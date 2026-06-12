@@ -202,6 +202,29 @@ export function restoreMemo(memo: Memo) {
   setState({ projects, memos: [memo, ...state.memos] });
 }
 
+export function renameProject(oldName: string, newName: string) {
+  const name = newName.trim();
+  if (!name || name === oldName) return;
+  const exists = state.projects.some((p) => p.name === name);
+  const projects = exists
+    ? state.projects.filter((p) => p.name !== oldName) // 같은 이름이 이미 있으면 합친다
+    : state.projects.map((p) => (p.name === oldName ? { ...p, name } : p));
+  const memos = state.memos.map((m) =>
+    m.project === oldName ? { ...m, project: name } : m
+  );
+  setState({ projects, memos });
+}
+
+/** 프로젝트를 삭제한다. 안에 있던 메모는 잃지 않고 미분류로 옮긴다. */
+export function deleteProject(name: string) {
+  setState({
+    projects: state.projects.filter((p) => p.name !== name),
+    memos: state.memos.map((m) =>
+      m.project === name ? { ...m, project: null } : m
+    ),
+  });
+}
+
 export function shareMemo(id: string) {
   setState({
     projects: state.projects,
