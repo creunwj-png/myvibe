@@ -7,8 +7,8 @@ import {
   ArrowLeft,
   Check,
   ChevronRight,
+  Home,
   Inbox,
-  Info,
   Plus,
   Search,
   Settings,
@@ -97,7 +97,7 @@ export function HomeScreen({ saved }: { saved?: string }) {
             <Link
               href="/home"
               aria-label="톡캐치 홈"
-              className="flex items-center gap-1.5 rounded-md"
+              className="flex items-center gap-3 rounded-md"
             >
               <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#fee500]">
                 <Sparkles size={16} className="text-[#1e1e1e]" strokeWidth={2.25} />
@@ -113,7 +113,7 @@ export function HomeScreen({ saved }: { saved?: string }) {
                 title="톡캐치 소개 화면"
                 className="flex h-11 w-11 items-center justify-center rounded-full text-[#333333] transition-colors hover:bg-[#f8f8f8]"
               >
-                <Info size={22} />
+                <Home size={22} />
               </Link>
               {!empty ? (
                 <button
@@ -201,8 +201,8 @@ function ProjectList({
           onClick={() => router.push(`/project/${encodeURIComponent(p.name)}`)}
           className="flex h-[60px] w-full items-center gap-3 rounded-xl px-3 text-left transition-colors hover:bg-[#f8f8f8] active:bg-[#f0f0f0]"
         >
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#f8f8f8] text-[#808080]">
-            <ProjectIcon name={p.name} size={18} />
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#1e1e1e] bg-white text-[#1e1e1e]">
+            <ProjectIcon name={p.name} size={20} />
           </span>
           <span className="min-w-0 flex-1 truncate text-[16px] font-medium text-[#222222]">
             {p.name}
