@@ -12,6 +12,7 @@ import {
   Plus,
   Search,
   Settings,
+  Sparkles,
 } from "lucide-react";
 
 // 더미 데이터 (docs/mockups/screens.md Global Mockup Assumptions)
@@ -106,9 +107,14 @@ export function HomeScreen({
             <Link
               href="/home"
               aria-label="톡캐치 홈"
-              className="rounded-md text-[22px] font-bold leading-none text-[#1e1e1e]"
+              className="flex items-center gap-1.5 rounded-md"
             >
-              톡캐치
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#fee500]">
+                <Sparkles size={16} className="text-[#1e1e1e]" strokeWidth={2.25} />
+              </span>
+              <span className="text-[22px] font-bold leading-none text-[#1e1e1e]">
+                톡캐치
+              </span>
             </Link>
             <div className="flex items-center">
               {!empty ? (
@@ -191,7 +197,9 @@ function ProjectList({ router }: { router: Router }) {
           <span className="min-w-0 flex-1 truncate text-[16px] font-medium text-[#222222]">
             {p.name}
           </span>
-          <span className="text-[15px] text-[#999999]">{p.count}</span>
+          <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#fee500] px-1.5 text-[12px] font-bold text-[#1e1e1e]">
+            {p.count}
+          </span>
           <ChevronRight size={18} className="text-[#cccccc]" />
         </button>
       ))}

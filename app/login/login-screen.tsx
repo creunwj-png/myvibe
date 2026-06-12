@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Loader2, MessageCircle, Smartphone, X } from "lucide-react";
+import { ArrowLeft, Loader2, MessageCircle, Smartphone, Sparkles, X } from "lucide-react";
 
 type Reason = "share" | "pileup";
 
@@ -89,9 +89,12 @@ export function LoginScreen({
             <Link
               href="/home"
               aria-label="톡캐치 홈"
-              className="text-[22px] font-bold text-[#1e1e1e]"
+              className="flex items-center gap-1.5"
             >
-              톡캐치
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#fee500]">
+                <Sparkles size={16} className="text-[#1e1e1e]" strokeWidth={2.25} />
+              </span>
+              <span className="text-[22px] font-bold text-[#1e1e1e]">톡캐치</span>
             </Link>
           </header>
           <p className="mb-2 mt-1 text-[12px] text-[#bbbbbb]">
