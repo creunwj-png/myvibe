@@ -6,6 +6,7 @@ import {
   ArrowLeft,
   ChevronDown,
   Folder,
+  Home,
   MoreVertical,
   Pencil,
   RotateCcw,
@@ -73,6 +74,13 @@ export function MemoScreen({ id }: { id: string }) {
             >
               <ArrowLeft size={24} />
             </Link>
+            <Link
+              href="/home"
+              aria-label="홈"
+              className="flex h-11 w-11 items-center justify-center rounded-full text-[#333333] transition-colors hover:bg-[#f8f8f8]"
+            >
+              <Home size={22} />
+            </Link>
           </header>
           <div className="flex flex-1 flex-col items-center justify-center gap-4 px-8 text-center">
             <p className="text-[16px] text-[#666666]">삭제했어요.</p>
@@ -95,13 +103,22 @@ export function MemoScreen({ id }: { id: string }) {
       <div className="mx-auto flex w-full max-w-[480px] flex-1 flex-col">
         {/* Header */}
         <header className="flex h-14 shrink-0 items-center justify-between pl-1 pr-2">
-          <Link
-            href={backHref}
-            aria-label="뒤로"
-            className="flex h-11 w-11 items-center justify-center rounded-full text-[#333333] transition-colors hover:bg-[#f8f8f8]"
-          >
-            <ArrowLeft size={24} />
-          </Link>
+          <div className="flex items-center">
+            <Link
+              href={backHref}
+              aria-label="뒤로"
+              className="flex h-11 w-11 items-center justify-center rounded-full text-[#333333] transition-colors hover:bg-[#f8f8f8]"
+            >
+              <ArrowLeft size={24} />
+            </Link>
+            <Link
+              href="/home"
+              aria-label="홈"
+              className="flex h-11 w-11 items-center justify-center rounded-full text-[#333333] transition-colors hover:bg-[#f8f8f8]"
+            >
+              <Home size={22} />
+            </Link>
+          </div>
 
           {editing ? (
             <button

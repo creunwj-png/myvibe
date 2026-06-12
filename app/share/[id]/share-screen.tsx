@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight, Check, Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Home, Loader2 } from "lucide-react";
 import { getMemo } from "../../lib/memos";
 
 /**
@@ -83,6 +83,13 @@ export function ShareScreen({
             className="flex h-11 w-11 items-center justify-center rounded-full text-[#333333] transition-colors hover:bg-[#f8f8f8]"
           >
             <ArrowLeft size={24} />
+          </Link>
+          <Link
+            href="/home"
+            aria-label="홈"
+            className="flex h-11 w-11 items-center justify-center rounded-full text-[#333333] transition-colors hover:bg-[#f8f8f8]"
+          >
+            <Home size={22} />
           </Link>
           <h1 className="text-[20px] font-bold text-[#1e1e1e]">팀에 공유</h1>
         </header>
