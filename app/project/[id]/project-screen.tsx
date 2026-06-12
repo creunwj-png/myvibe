@@ -4,35 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, MoreVertical, Plus, Search, Share2 } from "lucide-react";
 import { ProjectIcon } from "../../lib/project-icon";
-
-type Memo = { id: string; text: string; time: string; shared?: boolean };
-
-// 프로젝트별 더미 메모 (개수는 S004 홈과 일치 — docs/mockups/screens.md)
-const PROJECT_MEMOS: Record<string, Memo[]> = {
-  결제개편: [
-    { id: "p1", text: "결제 버튼 위치 다시 보기", time: "방금" },
-    { id: "p2", text: "결제 실패 리트라이 정책 정리", time: "어제" },
-    { id: "p3", text: "PG사 수수료 비교", time: "2일 전", shared: true },
-    { id: "p4", text: "정기결제 해지 플로우 점검", time: "3일 전" },
-    { id: "p5", text: "해외카드 수수료 케이스 모으기", time: "4일 전" },
-  ],
-  온보딩리뉴얼: [
-    { id: "o1", text: "환영 화면 일러스트 시안 보기", time: "방금" },
-    { id: "o2", text: "가입 단계 3개로 줄이기", time: "어제", shared: true },
-    { id: "o3", text: "온보딩 첫 화면 카피 다시", time: "3일 전" },
-  ],
-  검색고도화: [
-    { id: "s1", text: "검색 결과 정렬 기준 정리", time: "어제" },
-    { id: "s2", text: "오타 보정 자동완성 붙이기", time: "2일 전" },
-  ],
-  로그인개선: [
-    { id: "l1", text: "로그인 화면 A/B 테스트 해보면 어떨까", time: "방금" },
-  ],
-  미분류: [
-    { id: "u1", text: "회의록 공유 방식 바꾸기", time: "어제" },
-    { id: "u2", text: "데모 영상 길이 검토", time: "2일 전" },
-  ],
-};
+import { memosOf, useStore, type Memo } from "../../lib/store";
 
 /**
  * S005 프로젝트 상세.
@@ -41,8 +13,9 @@ const PROJECT_MEMOS: Record<string, Memo[]> = {
  * docs/mockups/screens.md S005 기준.
  */
 export function ProjectScreen({ name }: { name: string }) {
-  const memos = PROJECT_MEMOS[name] ?? [];
   const isUnclassified = name === "미분류";
+  const s = useStore();
+  const memos = memosOf(s, isUnclassified ? null : name);
 
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");

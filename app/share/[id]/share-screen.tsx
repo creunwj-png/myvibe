@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, Check, Home, Loader2 } from "lucide-react";
-import { getMemo } from "../../lib/memos";
+import { getMemo, shareMemo, useStore } from "../../lib/store";
 
 /**
  * S007 공유.
@@ -24,14 +24,34 @@ export function ShareScreen({
   errorMode: boolean;
 }) {
   const router = useRouter();
-  const memo = getMemo(id);
-  const board = `${memo.project === "분류 없음" ? "미분류" : memo.project} 팀 보드`;
+  const s = useStore();
+  const memo = getMemo(s, id);
 
   const [note, setNote] = useState("");
   const [phase, setPhase] = useState<"form" | "loading" | "done" | "error">(
     "form"
   );
 
+  if (!memo) {
+    return (
+      <main className="flex flex-1 flex-col items-center justify-center bg-white px-8 text-center">
+        <p className="text-[16px] text-[#666666]">공유할 메모를 찾을 수 없어요.</p>
+        <Link
+          href="/home"
+          className="mt-5 inline-flex h-12 items-center justify-center rounded-xl border border-[#e5e5e5] px-6 text-[15px] font-medium text-[#333333] transition-colors hover:bg-[#f8f8f8]"
+        >
+          홈으로
+        </Link>
+      </main>
+    );
+  }
+
+  const board = `${memo.project ?? "미분류"} 팀 보드`;
+
+  function complete() {
+    shareMemo(id);
+    setPhase("done");
+  }
   function submit() {
     if (!auth) {
       // 게스트 → 공유하려면 로그인 (S008), 로그인 후 돌아와 완료
@@ -39,12 +59,15 @@ export function ShareScreen({
       return;
     }
     setPhase("loading");
-    setTimeout(() => setPhase(errorMode ? "error" : "done"), 700);
+    setTimeout(() => {
+      if (errorMode) setPhase("error");
+      else complete();
+    }, 700);
   }
 
   function retry() {
     setPhase("loading");
-    setTimeout(() => setPhase("done"), 700);
+    setTimeout(complete, 700);
   }
 
   // 완료 — 담담하고 따뜻한 확인

@@ -12,41 +12,39 @@ import {
   Share2,
   Trash2,
 } from "lucide-react";
-import { getMemo } from "../../lib/memos";
 import { ProjectIcon } from "../../lib/project-icon";
+import {
+  deleteMemo,
+  getMemo,
+  reclassifyMemo,
+  restoreMemo,
+  updateMemoText,
+  useStore,
+  type Memo,
+} from "../../lib/store";
 
-// 재분류 후보 (분류 없음 포함)
-const RECLASSIFY_OPTIONS = [
-  "결제개편",
-  "온보딩리뉴얼",
-  "검색고도화",
-  "로그인개선",
-  "분류 없음",
-];
+const UNCLASSIFIED_LABEL = "분류 없음";
 
-function projectHref(project: string) {
-  const name = project === "분류 없음" ? "미분류" : project;
-  return `/project/${encodeURIComponent(name)}`;
+function projectHref(project: string | null) {
+  return `/project/${encodeURIComponent(project ?? "미분류")}`;
 }
 
 /**
  * S006 메모 상세·편집.
  * 메모를 다듬고(인라인 편집), 잘못 분류된 건 재분류, 필요 없으면 삭제(확인·되돌리기).
- * 공유의 진입점([팀에 공유하기] → S007).
+ * 공유의 진입점([팀에 공유하기] → S007). 데이터는 공용 스토어(app/lib/store).
  * docs/mockups/screens.md S006 기준.
  */
 export function MemoScreen({ id }: { id: string }) {
-  const memo = getMemo(id);
+  const s = useStore();
+  const memo = getMemo(s, id);
 
-  const [text, setText] = useState(memo.text);
-  const [project, setProject] = useState(memo.project);
-  const shared = !!memo.shared;
-
+  const [text, setText] = useState("");
   const [editing, setEditing] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [reclassifyOpen, setReclassifyOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const [deleted, setDeleted] = useState(false);
+  const [deletedMemo, setDeletedMemo] = useState<Memo | null>(null);
 
   const taRef = useRef<HTMLTextAreaElement>(null);
   useEffect(() => {
@@ -59,16 +57,14 @@ export function MemoScreen({ id }: { id: string }) {
     }
   }, [editing]);
 
-  const backHref = projectHref(project);
-
-  // 삭제 후 — 되돌리기 토스트 상태
-  if (deleted) {
+  // 삭제 후 — 되돌리기 상태
+  if (deletedMemo) {
     return (
       <main className="flex flex-1 flex-col bg-white">
         <div className="mx-auto flex w-full max-w-[480px] flex-1 flex-col">
           <header className="flex h-14 shrink-0 items-center px-2">
             <Link
-              href={backHref}
+              href={projectHref(deletedMemo.project)}
               aria-label="뒤로"
               className="flex h-11 w-11 items-center justify-center rounded-full text-[#333333] transition-colors hover:bg-[#f8f8f8]"
             >
@@ -86,7 +82,10 @@ export function MemoScreen({ id }: { id: string }) {
             <p className="text-[16px] text-[#666666]">삭제했어요.</p>
             <button
               type="button"
-              onClick={() => setDeleted(false)}
+              onClick={() => {
+                restoreMemo(deletedMemo);
+                setDeletedMemo(null);
+              }}
               className="flex h-11 items-center gap-1.5 rounded-xl border border-[#e5e5e5] px-4 text-[15px] font-medium text-[#333333] transition-colors hover:bg-[#f8f8f8]"
             >
               <RotateCcw size={16} />
@@ -98,6 +97,43 @@ export function MemoScreen({ id }: { id: string }) {
     );
   }
 
+  // 메모를 찾을 수 없음 (잘못된 링크 등)
+  if (!memo) {
+    return (
+      <main className="flex flex-1 flex-col items-center justify-center bg-white px-8 text-center">
+        <p className="text-[16px] text-[#666666]">메모를 찾을 수 없어요.</p>
+        <Link
+          href="/home"
+          className="mt-5 inline-flex h-12 items-center justify-center rounded-xl border border-[#e5e5e5] px-6 text-[15px] font-medium text-[#333333] transition-colors hover:bg-[#f8f8f8]"
+        >
+          홈으로
+        </Link>
+      </main>
+    );
+  }
+
+  const projectLabel = memo.project ?? UNCLASSIFIED_LABEL;
+  const options = [...s.projects.map((p) => p.name), UNCLASSIFIED_LABEL];
+
+  function startEdit() {
+    setText(memo!.text);
+    setMenuOpen(false);
+    setEditing(true);
+  }
+  function finishEdit() {
+    updateMemoText(id, text);
+    setEditing(false);
+  }
+  function chooseProject(opt: string) {
+    reclassifyMemo(id, opt === UNCLASSIFIED_LABEL ? null : opt);
+    setReclassifyOpen(false);
+  }
+  function confirmDeleteNow() {
+    setConfirmDelete(false);
+    setDeletedMemo(memo!);
+    deleteMemo(id);
+  }
+
   return (
     <main className="relative flex flex-1 flex-col bg-white">
       <div className="mx-auto flex w-full max-w-[480px] flex-1 flex-col">
@@ -105,7 +141,7 @@ export function MemoScreen({ id }: { id: string }) {
         <header className="flex h-14 shrink-0 items-center justify-between pl-1 pr-2">
           <div className="flex items-center">
             <Link
-              href={backHref}
+              href={projectHref(memo.project)}
               aria-label="뒤로"
               className="flex h-11 w-11 items-center justify-center rounded-full text-[#333333] transition-colors hover:bg-[#f8f8f8]"
             >
@@ -123,7 +159,7 @@ export function MemoScreen({ id }: { id: string }) {
           {editing ? (
             <button
               type="button"
-              onClick={() => setEditing(false)}
+              onClick={finishEdit}
               className="flex h-9 items-center rounded-lg px-3 text-[15px] font-bold text-[#1e1e1e]"
             >
               완료
@@ -142,10 +178,7 @@ export function MemoScreen({ id }: { id: string }) {
                 <div className="absolute right-1 top-11 z-50 w-36 overflow-hidden rounded-xl border border-[#e5e5e5] bg-white py-1 shadow-[0px_2px_6px_rgba(0,0,0,0.08)]">
                   <button
                     type="button"
-                    onClick={() => {
-                      setMenuOpen(false);
-                      setEditing(true);
-                    }}
+                    onClick={startEdit}
                     className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-[15px] text-[#333333] transition-colors hover:bg-[#f8f8f8]"
                   >
                     <Pencil size={16} />
@@ -175,17 +208,17 @@ export function MemoScreen({ id }: { id: string }) {
               ref={taRef}
               value={text}
               onChange={(e) => setText(e.target.value)}
-              onBlur={() => setEditing(false)}
+              onBlur={finishEdit}
               aria-label="메모 본문"
               className="mt-2 min-h-[120px] w-full resize-none bg-transparent text-[18px] leading-[1.6] text-[#222222] outline-none"
             />
           ) : (
             <button
               type="button"
-              onClick={() => setEditing(true)}
+              onClick={startEdit}
               className="mt-2 block w-full whitespace-pre-wrap text-left text-[18px] leading-[1.6] text-[#222222]"
             >
-              {text}
+              {memo.text}
             </button>
           )}
 
@@ -197,37 +230,32 @@ export function MemoScreen({ id }: { id: string }) {
                 onClick={() => setReclassifyOpen((v) => !v)}
                 className="flex items-center gap-1.5 rounded-lg border border-[#e5e5e5] py-1.5 pl-2.5 pr-2 text-[14px] text-[#333333] transition-colors hover:bg-[#f8f8f8]"
               >
-                <ProjectIcon name={project} size={15} className="text-[#808080]" />
-                {project}
+                <ProjectIcon name={projectLabel} size={15} className="text-[#808080]" />
+                {projectLabel}
                 <ChevronDown size={15} className="text-[#999999]" />
               </button>
               {reclassifyOpen ? (
-                <div className="absolute left-0 top-10 z-50 w-44 overflow-hidden rounded-xl border border-[#e5e5e5] bg-white py-1 shadow-[0px_2px_6px_rgba(0,0,0,0.08)]">
-                  {RECLASSIFY_OPTIONS.map((opt) => {
-                    const active = opt === project;
+                <div className="absolute left-0 top-10 z-50 max-h-64 w-44 overflow-y-auto rounded-xl border border-[#e5e5e5] bg-white py-1 shadow-[0px_2px_6px_rgba(0,0,0,0.08)]">
+                  {options.map((opt) => {
+                    const active = opt === projectLabel;
                     return (
                       <button
                         key={opt}
                         type="button"
-                        onClick={() => {
-                          setProject(opt);
-                          setReclassifyOpen(false);
-                        }}
+                        onClick={() => chooseProject(opt)}
                         className="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left text-[15px] text-[#333333] transition-colors hover:bg-[#f8f8f8]"
                       >
                         <span
-                          className={`flex h-4 w-4 items-center justify-center rounded-full border ${
-                            active
-                              ? "border-[#1e1e1e]"
-                              : "border-[#cccccc]"
+                          className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${
+                            active ? "border-[#1e1e1e]" : "border-[#cccccc]"
                           }`}
                         >
                           {active ? (
                             <span className="h-2 w-2 rounded-full bg-[#1e1e1e]" />
                           ) : null}
                         </span>
-                        <ProjectIcon name={opt} size={16} className="text-[#808080]" />
-                        {opt}
+                        <ProjectIcon name={opt} size={16} className="shrink-0 text-[#808080]" />
+                        <span className="truncate">{opt}</span>
                       </button>
                     );
                   })}
@@ -237,8 +265,8 @@ export function MemoScreen({ id }: { id: string }) {
 
             <p className="mt-2 text-[13px] text-[#999999]">
               {memo.time} ·{" "}
-              <span className={shared ? "text-[#2196f3]" : "text-[#999999]"}>
-                {shared ? "공유됨" : "개인"}
+              <span className={memo.shared ? "text-[#2196f3]" : "text-[#999999]"}>
+                {memo.shared ? "공유됨" : "개인"}
               </span>
             </p>
           </div>
@@ -294,10 +322,7 @@ export function MemoScreen({ id }: { id: string }) {
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  setConfirmDelete(false);
-                  setDeleted(true);
-                }}
+                onClick={confirmDeleteNow}
                 className="h-12 flex-1 rounded-xl bg-[#e02000] text-[15px] font-bold text-white transition-transform duration-150 active:scale-[0.99]"
               >
                 삭제

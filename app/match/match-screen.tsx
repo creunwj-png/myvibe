@@ -4,15 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Check, Plus, X } from "lucide-react";
 import { ProjectIcon } from "../lib/project-icon";
+import { projectsByRecency, throwAndClassify, useStore } from "../lib/store";
 
 type Recommendation = { name: string; count: number; likely?: boolean };
-
-// 더미 추천 프로젝트 (docs/mockups/screens.md Global Mockup Assumptions)
-const RECOMMENDATIONS: Recommendation[] = [
-  { name: "결제개편", count: 5, likely: true },
-  { name: "온보딩리뉴얼", count: 3 },
-  { name: "검색고도화", count: 2 },
-];
 
 /**
  * S003 AI 매칭 & 분류.
@@ -34,10 +28,16 @@ export function MatchScreen({
   error: boolean;
 }) {
   const router = useRouter();
-  const projectsExist = !fresh && !error;
-  // 추천이 없으면(케이스 B·에러 폴백) 곧장 '만들기' 뷰로 시작
+  const s = useStore();
+  const hasProjects = s.projects.length > 0;
+  const recommendations: Recommendation[] = projectsByRecency(s)
+    .slice(0, 3)
+    .map((p, i) => ({ ...p, likely: i === 0 }));
+  // 추천을 펼칠 수 있는 상태인지 (실 프로젝트 존재 + 강제 케이스B/에러 아님)
+  const showRecommend = hasProjects && !fresh && !error;
+
   const [view, setView] = useState<"recommend" | "create">(
-    projectsExist ? "recommend" : "create"
+    showRecommend ? "recommend" : "create"
   );
   const [newName, setNewName] = useState("");
   const [selecting, setSelecting] = useState<string | null>(null);
@@ -54,13 +54,20 @@ export function MatchScreen({
   function selectChip(name: string) {
     if (selecting) return;
     setSelecting(name); // 옐로 채움 → 잠깐 보이고 전이
+    throwAndClassify(text, name);
     setTimeout(() => goHome(name), 280);
   }
 
   function createAndSave() {
     const name = newName.trim();
     if (!name) return;
+    throwAndClassify(text, name);
     goHome(name);
+  }
+
+  function skipSave() {
+    throwAndClassify(text, null);
+    goHome("__none__");
   }
 
   return (
@@ -85,22 +92,23 @@ export function MatchScreen({
 
         {view === "recommend" ? (
           <RecommendView
+            recommendations={recommendations}
             loading={loading}
             selecting={selecting}
             onSelect={selectChip}
             onNew={() => setView("create")}
-            onSkip={() => goHome("__none__")}
+            onSkip={skipSave}
           />
         ) : (
           <CreateView
-            projectsExist={projectsExist}
+            projectsExist={hasProjects}
             error={error}
             value={newName}
             inputRef={nameRef}
             onChange={setNewName}
             onSubmit={createAndSave}
-            onBack={projectsExist ? () => setView("recommend") : undefined}
-            onSkip={() => goHome("__none__")}
+            onBack={hasProjects && !error ? () => setView("recommend") : undefined}
+            onSkip={skipSave}
           />
         )}
       </div>
@@ -110,12 +118,14 @@ export function MatchScreen({
 
 /* 케이스 A — 추천 모드 */
 function RecommendView({
+  recommendations,
   loading,
   selecting,
   onSelect,
   onNew,
   onSkip,
 }: {
+  recommendations: Recommendation[];
   loading: boolean;
   selecting: string | null;
   onSelect: (name: string) => void;
@@ -136,7 +146,7 @@ function RecommendView({
                 className="h-[60px] animate-pulse rounded-xl bg-[#f0f0f0]"
               />
             ))
-          : RECOMMENDATIONS.map((p) => {
+          : recommendations.map((p) => {
               const chosen = selecting === p.name;
               return (
                 <button

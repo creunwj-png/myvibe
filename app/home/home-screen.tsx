@@ -15,23 +15,13 @@ import {
   Sparkles,
 } from "lucide-react";
 import { ProjectIcon } from "../lib/project-icon";
-
-// 더미 데이터 (docs/mockups/screens.md Global Mockup Assumptions)
-const PROJECTS = [
-  { name: "결제개편", count: 5 },
-  { name: "온보딩리뉴얼", count: 3 },
-  { name: "검색고도화", count: 2 },
-  { name: "로그인개선", count: 1 },
-];
-const UNCLASSIFIED = 2;
-
-const MEMOS = [
-  { id: "m1", text: "로그인 화면 A/B 테스트 해보면 어떨까", project: "로그인개선", time: "방금" },
-  { id: "m2", text: "PG사 수수료 비교", project: "결제개편", time: "2일 전" },
-  { id: "m3", text: "결제 실패 리트라이", project: "결제개편", time: "어제" },
-  { id: "m4", text: "온보딩 첫 화면 카피 다시 보기", project: "온보딩리뉴얼", time: "3일 전" },
-  { id: "m5", text: "검색 결과 정렬 기준 정리", project: "검색고도화", time: "어제" },
-];
+import {
+  countOf,
+  projectsByRecency,
+  searchMemos,
+  useStore,
+  type Memo,
+} from "../lib/store";
 
 function deriveToast(saved?: string) {
   if (!saved) return null;
@@ -43,16 +33,11 @@ function deriveToast(saved?: string) {
  * S004 홈.
  * 던진 게 어디 들어갔는지 확인(aha 마무리)하고, 프로젝트별 점검·반복 캡처의 허브.
  * 상태: 채워짐(기본) / 빈 상태 / 던진 직후 확인 토스트 / 검색.
- * docs/mockups/screens.md S004 기준.
+ * docs/mockups/screens.md S004 기준. 데이터는 공용 스토어(app/lib/store).
  */
-export function HomeScreen({
-  saved,
-  empty,
-}: {
-  saved?: string;
-  empty: boolean;
-}) {
+export function HomeScreen({ saved }: { saved?: string }) {
   const router = useRouter();
+  const s = useStore();
   const [toast, setToast] = useState<string | null>(() => deriveToast(saved));
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -69,8 +54,12 @@ export function HomeScreen({
     if (searchOpen) searchRef.current?.focus();
   }, [searchOpen]);
 
+  const projects = projectsByRecency(s);
+  const unclassified = countOf(s, null);
+  const empty = projects.length === 0 && unclassified === 0;
+
   const q = query.trim();
-  const results = q ? MEMOS.filter((m) => m.text.includes(q)) : [];
+  const results = searchMemos(s, q);
 
   return (
     <main className="flex flex-1 flex-col bg-white">
@@ -167,7 +156,11 @@ export function HomeScreen({
           ) : empty ? (
             <EmptyBody />
           ) : (
-            <ProjectList router={router} />
+            <ProjectList
+              router={router}
+              projects={projects}
+              unclassified={unclassified}
+            />
           )}
         </div>
 
@@ -190,45 +183,57 @@ export function HomeScreen({
 
 type Router = ReturnType<typeof useRouter>;
 
-function ProjectList({ router }: { router: Router }) {
+function ProjectList({
+  router,
+  projects,
+  unclassified,
+}: {
+  router: Router;
+  projects: { name: string; count: number }[];
+  unclassified: number;
+}) {
   return (
     <div className="px-3 py-2">
-      {PROJECTS.map((p) => (
-          <button
-            key={p.name}
-            type="button"
-            onClick={() => router.push(`/project/${encodeURIComponent(p.name)}`)}
-            className="flex h-[60px] w-full items-center gap-3 rounded-xl px-3 text-left transition-colors hover:bg-[#f8f8f8] active:bg-[#f0f0f0]"
-          >
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#f8f8f8] text-[#808080]">
-              <ProjectIcon name={p.name} size={18} />
-            </span>
-            <span className="min-w-0 flex-1 truncate text-[16px] font-medium text-[#222222]">
-              {p.name}
-            </span>
-            <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#fee500] px-1.5 text-[12px] font-bold text-[#1e1e1e]">
-              {p.count}
-            </span>
-            <ChevronRight size={18} className="text-[#cccccc]" />
-          </button>
+      {projects.map((p) => (
+        <button
+          key={p.name}
+          type="button"
+          onClick={() => router.push(`/project/${encodeURIComponent(p.name)}`)}
+          className="flex h-[60px] w-full items-center gap-3 rounded-xl px-3 text-left transition-colors hover:bg-[#f8f8f8] active:bg-[#f0f0f0]"
+        >
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#f8f8f8] text-[#808080]">
+            <ProjectIcon name={p.name} size={18} />
+          </span>
+          <span className="min-w-0 flex-1 truncate text-[16px] font-medium text-[#222222]">
+            {p.name}
+          </span>
+          <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#fee500] px-1.5 text-[12px] font-bold text-[#1e1e1e]">
+            {p.count}
+          </span>
+          <ChevronRight size={18} className="text-[#cccccc]" />
+        </button>
       ))}
 
       {/* 미분류 — 별도 섹션 (나중에 정리 자리) */}
-      <div className="my-1.5 h-px bg-[#f0f0f0]" />
-      <button
-        type="button"
-        onClick={() => router.push(`/project/${encodeURIComponent("미분류")}`)}
-        className="flex h-[60px] w-full items-center gap-3 rounded-xl px-3 text-left transition-colors hover:bg-[#f8f8f8] active:bg-[#f0f0f0]"
-      >
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#f8f8f8] text-[#999999]">
-          <Inbox size={18} />
-        </span>
-        <span className="min-w-0 flex-1 truncate text-[16px] text-[#666666]">
-          미분류
-        </span>
-        <span className="text-[15px] text-[#999999]">{UNCLASSIFIED}</span>
-        <ChevronRight size={18} className="text-[#cccccc]" />
-      </button>
+      {unclassified > 0 ? (
+        <>
+          <div className="my-1.5 h-px bg-[#f0f0f0]" />
+          <button
+            type="button"
+            onClick={() => router.push(`/project/${encodeURIComponent("미분류")}`)}
+            className="flex h-[60px] w-full items-center gap-3 rounded-xl px-3 text-left transition-colors hover:bg-[#f8f8f8] active:bg-[#f0f0f0]"
+          >
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#f8f8f8] text-[#999999]">
+              <Inbox size={18} />
+            </span>
+            <span className="min-w-0 flex-1 truncate text-[16px] text-[#666666]">
+              미분류
+            </span>
+            <span className="text-[15px] text-[#999999]">{unclassified}</span>
+            <ChevronRight size={18} className="text-[#cccccc]" />
+          </button>
+        </>
+      ) : null}
     </div>
   );
 }
@@ -252,7 +257,7 @@ function SearchBody({
   router,
 }: {
   query: string;
-  results: typeof MEMOS;
+  results: Memo[];
   router: Router;
 }) {
   if (!query) {
@@ -286,7 +291,7 @@ function SearchBody({
               {m.text}
             </p>
             <p className="mt-1 text-[13px] text-[#999999]">
-              {m.project} · {m.time}
+              {m.project ?? "미분류"} · {m.time}
             </p>
           </button>
         ))}
