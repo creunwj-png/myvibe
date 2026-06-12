@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, MoreVertical, Plus, Search, Share2 } from "lucide-react";
+import { ProjectIcon } from "../../lib/project-icon";
 
 type Memo = { id: string; text: string; time: string; shared?: boolean };
 
@@ -102,6 +103,7 @@ export function ProjectScreen({ name }: { name: string }) {
             >
               <ArrowLeft size={24} />
             </Link>
+            <ProjectIcon name={name} size={20} className="ml-1 shrink-0 text-[#808080]" />
             <h1 className="min-w-0 flex-1 truncate text-[20px] font-bold text-[#1e1e1e]">
               {name}
             </h1>

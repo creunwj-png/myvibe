@@ -7,13 +7,14 @@ import {
   ArrowLeft,
   Check,
   ChevronRight,
-  Folder,
   Inbox,
+  Info,
   Plus,
   Search,
   Settings,
   Sparkles,
 } from "lucide-react";
+import { ProjectIcon } from "../lib/project-icon";
 
 // 더미 데이터 (docs/mockups/screens.md Global Mockup Assumptions)
 const PROJECTS = [
@@ -117,6 +118,14 @@ export function HomeScreen({
               </span>
             </Link>
             <div className="flex items-center">
+              <Link
+                href="/"
+                aria-label="환영 화면"
+                title="톡캐치 소개 화면"
+                className="flex h-11 w-11 items-center justify-center rounded-full text-[#333333] transition-colors hover:bg-[#f8f8f8]"
+              >
+                <Info size={22} />
+              </Link>
               {!empty ? (
                 <button
                   type="button"
@@ -185,23 +194,23 @@ function ProjectList({ router }: { router: Router }) {
   return (
     <div className="px-3 py-2">
       {PROJECTS.map((p) => (
-        <button
-          key={p.name}
-          type="button"
-          onClick={() => router.push(`/project/${encodeURIComponent(p.name)}`)}
-          className="flex h-[60px] w-full items-center gap-3 rounded-xl px-3 text-left transition-colors hover:bg-[#f8f8f8] active:bg-[#f0f0f0]"
-        >
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#f8f8f8] text-[#808080]">
-            <Folder size={18} />
-          </span>
-          <span className="min-w-0 flex-1 truncate text-[16px] font-medium text-[#222222]">
-            {p.name}
-          </span>
-          <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#fee500] px-1.5 text-[12px] font-bold text-[#1e1e1e]">
-            {p.count}
-          </span>
-          <ChevronRight size={18} className="text-[#cccccc]" />
-        </button>
+          <button
+            key={p.name}
+            type="button"
+            onClick={() => router.push(`/project/${encodeURIComponent(p.name)}`)}
+            className="flex h-[60px] w-full items-center gap-3 rounded-xl px-3 text-left transition-colors hover:bg-[#f8f8f8] active:bg-[#f0f0f0]"
+          >
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#f8f8f8] text-[#808080]">
+              <ProjectIcon name={p.name} size={18} />
+            </span>
+            <span className="min-w-0 flex-1 truncate text-[16px] font-medium text-[#222222]">
+              {p.name}
+            </span>
+            <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#fee500] px-1.5 text-[12px] font-bold text-[#1e1e1e]">
+              {p.count}
+            </span>
+            <ChevronRight size={18} className="text-[#cccccc]" />
+          </button>
       ))}
 
       {/* 미분류 — 별도 섹션 (나중에 정리 자리) */}

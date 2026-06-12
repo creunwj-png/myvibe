@@ -5,7 +5,6 @@ import Link from "next/link";
 import {
   ArrowLeft,
   ChevronDown,
-  Folder,
   Home,
   MoreVertical,
   Pencil,
@@ -14,6 +13,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { getMemo } from "../../lib/memos";
+import { ProjectIcon } from "../../lib/project-icon";
 
 // 재분류 후보 (분류 없음 포함)
 const RECLASSIFY_OPTIONS = [
@@ -197,7 +197,7 @@ export function MemoScreen({ id }: { id: string }) {
                 onClick={() => setReclassifyOpen((v) => !v)}
                 className="flex items-center gap-1.5 rounded-lg border border-[#e5e5e5] py-1.5 pl-2.5 pr-2 text-[14px] text-[#333333] transition-colors hover:bg-[#f8f8f8]"
               >
-                <Folder size={15} className="text-[#808080]" />
+                <ProjectIcon name={project} size={15} className="text-[#808080]" />
                 {project}
                 <ChevronDown size={15} className="text-[#999999]" />
               </button>
@@ -226,6 +226,7 @@ export function MemoScreen({ id }: { id: string }) {
                             <span className="h-2 w-2 rounded-full bg-[#1e1e1e]" />
                           ) : null}
                         </span>
+                        <ProjectIcon name={opt} size={16} className="text-[#808080]" />
                         {opt}
                       </button>
                     );

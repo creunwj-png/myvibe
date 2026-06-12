@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Check, Folder, Plus, X } from "lucide-react";
+import { ArrowLeft, Check, Plus, X } from "lucide-react";
+import { ProjectIcon } from "../lib/project-icon";
 
 type Recommendation = { name: string; count: number; likely?: boolean };
 
@@ -153,7 +154,7 @@ function RecommendView({
                       chosen ? "text-[#1e1e1e]" : "text-[#999999]"
                     }`}
                   >
-                    {chosen ? <Check size={20} /> : <Folder size={20} />}
+                    {chosen ? <Check size={20} /> : <ProjectIcon name={p.name} size={20} />}
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-[16px] font-medium text-[#222222]">
