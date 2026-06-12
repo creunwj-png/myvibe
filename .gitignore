@@ -8,6 +8,8 @@ vendor/
 dist/
 build/
 out/
+.next/
+next-env.d.ts
 *.tsbuildinfo
 
 # Environment & secrets
