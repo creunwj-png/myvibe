@@ -2,27 +2,17 @@
 
 import { useState } from "react";
 import { Loader2, Lock, LogOut, MessageCircle, Send, Sparkles, X } from "lucide-react";
-import {
-  decodeSnapshot,
-  mergeComments,
-  type BoardSnapshot,
-} from "../../../lib/board-share";
-import {
-  addComment,
-  commentsOf,
-  deleteComment,
-  useStore,
-} from "../../../lib/store";
+import { decodeSnapshot, type BoardSnapshot } from "../../../lib/board-share";
+import { useBoardComments, type BoardComment } from "../../../lib/board-comments";
 
 type SnapMemo = BoardSnapshot["memos"][number];
-type MergedComment = { id: string; author: string; text: string; time: string; mine: boolean };
 
 /**
  * S010 공유 보드(외부 링크 뷰).
  * 전용 링크로 들어온 팀원이 카카오 로그인 후 그 보드만 보고 코멘트한다(샌드박스).
  * 홈·다른 프로젝트·다른 메모로 가는 길이 없다 — UI에 스냅샷의 메모만 노출(접근 제한은 화면 수준).
- * 코멘트는 메인 스토어에 저장돼 팀 보드(S009)와 한 곳에서 공유되고, 표시할 땐
- * 스냅샷 코멘트(공유 시점 원본)와 id로 병합한다.
+ * 코멘트는 Supabase(board_key=프로젝트)에 저장돼 팀 보드(S009)·다른 기기와 동기화된다.
+ * Supabase가 없으면 로컬 스토어로 폴백하며, 그 땐 스냅샷 코멘트와 병합해 보여준다.
  * 상태: 손상 토큰 오류 / 로그인 게이트 / 인증 로딩 / 보드 뷰 / 코멘트 추가·삭제.
  * docs/mockups/screens.md S010 기준.
  */
@@ -34,9 +24,12 @@ export function InvitedBoardScreen({
   token: string;
 }) {
   const snapshot = decodeSnapshot(token);
-  const s = useStore();
   // 보드명: 경로의 프로젝트를 우선, 없으면 스냅샷.
   const boardName = project || snapshot?.project || "팀";
+  const { commentsFor, add, remove } = useBoardComments(
+    project,
+    snapshot?.comments
+  );
 
   // 인증은 세션 상태(새로고침하면 게이트부터 다시 — 초대 로그인 취지에 맞음).
   const [authed, setAuthed] = useState(false);
@@ -51,12 +44,6 @@ export function InvitedBoardScreen({
   }
   function logout() {
     setAuthed(false);
-  }
-  function onAdd(memoId: string, text: string) {
-    addComment(memoId, text); // 메인 스토어에 저장 → 팀 보드(S009)와 공유
-  }
-  function onDelete(id: string) {
-    deleteComment(id);
   }
 
   // 손상/형식 불일치 토큰
@@ -155,12 +142,9 @@ export function InvitedBoardScreen({
                 <VisitorCard
                   key={m.id}
                   memo={m}
-                  comments={mergeComments(
-                    snapshot.comments.filter((c) => c.memoId === m.id),
-                    commentsOf(s, m.id)
-                  )}
-                  onAdd={onAdd}
-                  onDelete={onDelete}
+                  comments={commentsFor(m.id)}
+                  onAdd={add}
+                  onDelete={remove}
                 />
               ))}
             </div>
@@ -178,7 +162,7 @@ function VisitorCard({
   onDelete,
 }: {
   memo: SnapMemo;
-  comments: MergedComment[];
+  comments: BoardComment[];
   onAdd: (memoId: string, text: string) => void;
   onDelete: (id: string) => void;
 }) {

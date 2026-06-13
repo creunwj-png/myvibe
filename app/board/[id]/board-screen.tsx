@@ -3,17 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Check, Copy, Home, Link2, Send, Share2, X } from "lucide-react";
-import {
-  addComment,
-  commentsOf,
-  deleteComment,
-  sharedMemosOf,
-  useStore,
-  type Comment,
-  type Memo,
-  type State,
-} from "../../lib/store";
+import { sharedMemosOf, useStore, type Memo } from "../../lib/store";
 import { encodeSnapshot, type BoardSnapshot } from "../../lib/board-share";
+import { useBoardComments, type BoardComment } from "../../lib/board-comments";
 
 /**
  * S009 팀 보드.
@@ -27,6 +19,7 @@ export function BoardScreen({ name }: { name: string }) {
   const isUnclassified = name === "미분류";
   const s = useStore();
   const memos = sharedMemosOf(s, isUnclassified ? null : name);
+  const { commentsFor, add, remove } = useBoardComments(name);
   const projectHref = `/project/${encodeURIComponent(name)}`;
   const [shareOpen, setShareOpen] = useState(false);
 
@@ -76,7 +69,13 @@ export function BoardScreen({ name }: { name: string }) {
               </p>
               <div className="flex flex-col gap-3">
                 {memos.map((m) => (
-                  <BoardCard key={m.id} memo={m} comments={commentsOf(s, m.id)} />
+                  <BoardCard
+                    key={m.id}
+                    memo={m}
+                    comments={commentsFor(m.id)}
+                    onAdd={add}
+                    onDelete={remove}
+                  />
                 ))}
               </div>
             </div>
@@ -86,7 +85,7 @@ export function BoardScreen({ name }: { name: string }) {
 
       {shareOpen ? (
         <ShareSheet
-          snapshot={buildSnapshot(s, name, memos)}
+          snapshot={buildSnapshot(name, memos, commentsFor)}
           onClose={() => setShareOpen(false)}
         />
       ) : null}
@@ -95,13 +94,17 @@ export function BoardScreen({ name }: { name: string }) {
 }
 
 /** 현재 보드를 공유 링크용 스냅샷으로 만든다(메모 + 그 메모들의 코멘트). */
-function buildSnapshot(s: State, name: string, memos: Memo[]): BoardSnapshot {
+function buildSnapshot(
+  name: string,
+  memos: Memo[],
+  commentsFor: (memoId: string) => BoardComment[]
+): BoardSnapshot {
   return {
     v: 1,
     project: name,
     memos: memos.map((m) => ({ id: m.id, text: m.text, time: m.time })),
     comments: memos.flatMap((m) =>
-      commentsOf(s, m.id).map((c) => ({
+      commentsFor(m.id).map((c) => ({
         id: c.id,
         memoId: c.memoId,
         author: c.author,
@@ -193,13 +196,23 @@ function ShareSheet({
   );
 }
 
-function BoardCard({ memo, comments }: { memo: Memo; comments: Comment[] }) {
+function BoardCard({
+  memo,
+  comments,
+  onAdd,
+  onDelete,
+}: {
+  memo: Memo;
+  comments: BoardComment[];
+  onAdd: (memoId: string, text: string) => void;
+  onDelete: (id: string) => void;
+}) {
   const [draft, setDraft] = useState("");
 
   function submit() {
     const t = draft.trim();
     if (!t) return;
-    addComment(memo.id, t);
+    onAdd(memo.id, t);
     setDraft("");
   }
 
@@ -223,7 +236,7 @@ function BoardCard({ memo, comments }: { memo: Memo; comments: Comment[] }) {
         ) : (
           <ul className="flex flex-col gap-3">
             {comments.map((c) => (
-              <CommentRow key={c.id} comment={c} />
+              <CommentRow key={c.id} comment={c} onDelete={() => onDelete(c.id)} />
             ))}
           </ul>
         )}
@@ -261,7 +274,13 @@ function BoardCard({ memo, comments }: { memo: Memo; comments: Comment[] }) {
   );
 }
 
-function CommentRow({ comment }: { comment: Comment }) {
+function CommentRow({
+  comment,
+  onDelete,
+}: {
+  comment: BoardComment;
+  onDelete: () => void;
+}) {
   return (
     <li className="flex items-start gap-2.5">
       <span
@@ -285,7 +304,7 @@ function CommentRow({ comment }: { comment: Comment }) {
       {comment.mine ? (
         <button
           type="button"
-          onClick={() => deleteComment(comment.id)}
+          onClick={onDelete}
           aria-label="코멘트 삭제"
           className="-mr-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[#cccccc] transition-colors hover:bg-[#f8f8f8] hover:text-[#888888]"
         >

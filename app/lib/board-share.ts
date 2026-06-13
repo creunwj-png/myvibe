@@ -53,29 +53,3 @@ export function decodeSnapshot(token: string): BoardSnapshot | null {
     return null;
   }
 }
-
-/**
- * 스냅샷 코멘트 + 메인 스토어 코멘트를 id로 병합한다(중복 제거).
- * - 스냅샷 코멘트(공유 시점 원본)는 순서대로, 메인 스토어에 같은 id가 있으면 그 mine을 반영.
- * - 스냅샷에 없는(이후 추가된) 스토어 코멘트는 시간순으로 뒤에 붙인다.
- * 다른 기기에선 스냅샷이 원본을, 같은 브라우저에선 스토어가 최신을 채운다.
- */
-export function mergeComments(
-  snapshot: BoardSnapshot["comments"],
-  store: { id: string; author: string; text: string; time: string; mine: boolean; createdAt: number }[]
-): { id: string; author: string; text: string; time: string; mine: boolean }[] {
-  const inSnapshot = new Set(snapshot.map((c) => c.id));
-  const storeById = new Map(store.map((c) => [c.id, c]));
-  const originals = snapshot.map((c) => ({
-    id: c.id,
-    author: c.author,
-    text: c.text,
-    time: c.time,
-    mine: storeById.get(c.id)?.mine ?? false,
-  }));
-  const added = store
-    .filter((c) => !inSnapshot.has(c.id))
-    .sort((a, b) => a.createdAt - b.createdAt)
-    .map((c) => ({ id: c.id, author: c.author, text: c.text, time: c.time, mine: c.mine }));
-  return [...originals, ...added];
-}
