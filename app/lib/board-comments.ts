@@ -85,7 +85,11 @@ async function loadComments(boardKey: string): Promise<BoardComment[]> {
     .select("id,memo_id,author,body,created_at")
     .eq("board_key", boardKey)
     .order("created_at", { ascending: true });
-  if (error || !data) return [];
+  if (error || !data) {
+    // 조용히 빈 목록으로 폴백하면 설정/권한 오류(잘못된 키·RLS)가 "댓글 없음"으로 묻힌다 — 콘솔에 남긴다.
+    if (error) console.error("[board-comments] 댓글 불러오기 실패", error);
+    return [];
+  }
   const mine = readMine();
   return (data as Row[]).map((r) => ({
     id: r.id,
@@ -125,11 +129,12 @@ export function useBoardComments(
       const t = text.trim();
       if (!t) return;
       if (isSupabaseEnabled && supabase) {
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from("board_comments")
           .insert({ board_key: boardKey, memo_id: memoId, author: "나", body: t })
           .select("id")
           .single();
+        if (error) console.error("[board-comments] 댓글 등록 실패", error);
         if (data?.id) markMine(data.id as string);
         setRows(await loadComments(boardKey));
       } else {
@@ -142,7 +147,8 @@ export function useBoardComments(
   const remove = useCallback(
     async (id: string) => {
       if (isSupabaseEnabled && supabase) {
-        await supabase.from("board_comments").delete().eq("id", id);
+        const { error } = await supabase.from("board_comments").delete().eq("id", id);
+        if (error) console.error("[board-comments] 댓글 삭제 실패", error);
         unmarkMine(id);
         setRows(await loadComments(boardKey));
       } else {
