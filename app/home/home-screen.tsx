@@ -13,6 +13,7 @@ import {
   Plus,
   Search,
   Settings,
+  Share2,
   Sparkles,
 } from "lucide-react";
 import { ProjectIcon } from "../lib/project-icon";
@@ -268,29 +269,53 @@ function ProjectList({
   unclassified,
 }: {
   router: Router;
-  projects: { name: string; count: number }[];
+  projects: { name: string; count: number; shared: number }[];
   unclassified: number;
 }) {
   return (
     <div className="px-3 py-2">
       {projects.map((p) => (
-        <button
+        <div
           key={p.name}
-          type="button"
-          onClick={() => router.push(`/project/${encodeURIComponent(p.name)}`)}
-          className="flex h-[60px] w-full items-center gap-3 rounded-xl px-3 text-left transition-colors hover:bg-[#f8f8f8] active:bg-[#f0f0f0]"
+          className="flex h-[60px] w-full items-center gap-3 rounded-xl px-3 transition-colors hover:bg-[#f8f8f8]"
         >
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#1e1e1e] bg-white text-[#1e1e1e]">
-            <ProjectIcon name={p.name} size={20} />
-          </span>
-          <span className="min-w-0 flex-1 truncate text-[16px] font-medium text-[#222222]">
-            {p.name}
-          </span>
-          <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#fee500] px-1.5 text-[12px] font-bold text-[#1e1e1e]">
-            {p.count}
-          </span>
-          <ChevronRight size={18} className="text-[#cccccc]" />
-        </button>
+          <button
+            type="button"
+            onClick={() => router.push(`/project/${encodeURIComponent(p.name)}`)}
+            className="flex min-w-0 flex-1 items-center gap-3 text-left"
+          >
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#1e1e1e] bg-white text-[#1e1e1e]">
+              <ProjectIcon name={p.name} size={20} />
+            </span>
+            <span className="min-w-0 flex-1 truncate text-[16px] font-medium text-[#222222]">
+              {p.name}
+            </span>
+          </button>
+          {/* 팀 보드가 생성된 프로젝트(공유 메모 보유): 식별 표시 겸 보드 바로가기 */}
+          {p.shared > 0 ? (
+            <button
+              type="button"
+              onClick={() => router.push(`/board/${encodeURIComponent(p.name)}`)}
+              aria-label={`${p.name} 팀 보드 보기`}
+              title="팀 보드 보기"
+              className="flex h-7 shrink-0 items-center gap-1 rounded-full bg-[#e8f3fe] px-2 text-[12px] font-bold text-[#2196f3] transition-colors hover:bg-[#d6eafd] active:bg-[#c4e0fc]"
+            >
+              <Share2 size={13} />
+              {p.shared}
+            </button>
+          ) : null}
+          <button
+            type="button"
+            onClick={() => router.push(`/project/${encodeURIComponent(p.name)}`)}
+            aria-label={`${p.name} 열기`}
+            className="flex shrink-0 items-center gap-3"
+          >
+            <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#fee500] px-1.5 text-[12px] font-bold text-[#1e1e1e]">
+              {p.count}
+            </span>
+            <ChevronRight size={18} className="text-[#cccccc]" />
+          </button>
+        </div>
       ))}
 
       {/* 미분류 — 별도 섹션 (나중에 정리 자리) */}

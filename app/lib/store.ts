@@ -170,8 +170,13 @@ export function commentCountOf(s: State, memoId: string): number {
   return s.comments.filter((c) => c.memoId === memoId).length;
 }
 
-/** 홈 표시용: 프로젝트를 최근 활동순(프로젝트 내 최신 메모 기준)으로 정렬. */
-export function projectsByRecency(s: State): { name: string; count: number }[] {
+/**
+ * 홈 표시용: 프로젝트를 최근 활동순(프로젝트 내 최신 메모 기준)으로 정렬.
+ * shared = 그 프로젝트의 공유 메모 수(>0이면 팀 보드가 생성된 프로젝트).
+ */
+export function projectsByRecency(
+  s: State
+): { name: string; count: number; shared: number }[] {
   const lastActivity = (name: string) => {
     const times = s.memos.filter((m) => m.project === name).map((m) => m.createdAt);
     const proj = s.projects.find((p) => p.name === name);
@@ -179,7 +184,11 @@ export function projectsByRecency(s: State): { name: string; count: number }[] {
   };
   return [...s.projects]
     .sort((a, b) => lastActivity(b.name) - lastActivity(a.name))
-    .map((p) => ({ name: p.name, count: countOf(s, p.name) }));
+    .map((p) => ({
+      name: p.name,
+      count: countOf(s, p.name),
+      shared: sharedCountOf(s, p.name),
+    }));
 }
 
 export function getMemo(s: State, id: string): Memo | undefined {
