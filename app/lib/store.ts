@@ -16,7 +16,19 @@ export type Memo = {
 
 export type Project = { name: string; createdAt: number };
 
-export type State = { projects: Project[]; memos: Memo[] };
+// 팀 보드 코멘트(FR-013). 백엔드·실시간·권한은 목업 범위 밖 —
+// 내 코멘트는 mine:true("나"), 팀원 코멘트는 시드로 둔다.
+export type Comment = {
+  id: string;
+  memoId: string;
+  author: string;
+  mine: boolean;
+  text: string;
+  time: string; // 표시용 상대 시각 라벨
+  createdAt: number; // 정렬용
+};
+
+export type State = { projects: Project[]; memos: Memo[]; comments: Comment[] };
 
 const KEY = "tokcatch.v1";
 const H = 3_600_000;
@@ -45,6 +57,12 @@ const SEED: State = {
     { id: "u1", text: "회의록 공유 방식 바꾸기", project: null, shared: false, time: "어제", createdAt: SEED_BASE - 29 * H },
     { id: "u2", text: "데모 영상 길이 검토", project: null, shared: false, time: "2일 전", createdAt: SEED_BASE - 53 * H },
   ],
+  // 공유된 시드 메모(p3, o2)에 팀원 코멘트를 미리 둬 보드를 살린다.
+  comments: [
+    { id: "c1", memoId: "p3", author: "지민", mine: false, text: "PG사별 수수료 표로 정리해볼게요.", time: "1일 전", createdAt: SEED_BASE - 40 * H },
+    { id: "c2", memoId: "p3", author: "현우", mine: false, text: "체크카드 케이스도 빠지지 않게요.", time: "5시간 전", createdAt: SEED_BASE - 5 * H },
+    { id: "c3", memoId: "o2", author: "지민", mine: false, text: "3단계도 줄일 여지 있어 보여요. 2단계 안도 같이 볼까요?", time: "어제", createdAt: SEED_BASE - 24 * H },
+  ],
 };
 
 let state: State = SEED;
@@ -63,8 +81,9 @@ function persist() {
   }
 }
 
-function setState(next: State) {
-  state = next;
+// 부분 갱신을 머지한다 — 액션이 일부 필드만 넘겨도 comments 등 나머지가 보존된다.
+function setState(next: Partial<State>) {
+  state = { ...state, ...next };
   persist();
   emit();
 }
@@ -88,9 +107,14 @@ function hydrate() {
   try {
     const raw = localStorage.getItem(KEY);
     if (raw) {
-      const parsed = JSON.parse(raw) as State;
+      const parsed = JSON.parse(raw) as Partial<State>;
       if (parsed && Array.isArray(parsed.projects) && Array.isArray(parsed.memos)) {
-        state = parsed;
+        // 코멘트 도입 전 저장본과 호환: comments가 없으면 시드 코멘트로 채운다.
+        state = {
+          projects: parsed.projects,
+          memos: parsed.memos,
+          comments: Array.isArray(parsed.comments) ? parsed.comments : SEED.comments,
+        };
         emit();
         return;
       }
@@ -132,6 +156,18 @@ export function sharedMemosOf(s: State, project: string | null): Memo[] {
 /** 팀 보드 진입 노출/배지용: 그 프로젝트의 공유 메모 수. */
 export function sharedCountOf(s: State, project: string | null): number {
   return s.memos.filter((m) => m.project === project && m.shared).length;
+}
+
+/** 한 메모의 코멘트(오래된→최신). */
+export function commentsOf(s: State, memoId: string): Comment[] {
+  return s.comments
+    .filter((c) => c.memoId === memoId)
+    .sort((a, b) => a.createdAt - b.createdAt);
+}
+
+/** 한 메모의 코멘트 수. */
+export function commentCountOf(s: State, memoId: string): number {
+  return s.comments.filter((c) => c.memoId === memoId).length;
 }
 
 /** 홈 표시용: 프로젝트를 최근 활동순(프로젝트 내 최신 메모 기준)으로 정렬. */
@@ -255,7 +291,27 @@ export function deleteProject(name: string) {
 
 export function shareMemo(id: string) {
   setState({
-    projects: state.projects,
     memos: state.memos.map((m) => (m.id === id ? { ...m, shared: true } : m)),
   });
+}
+
+/** 팀 보드에서 메모에 코멘트를 단다(작성자 "나"). 빈 내용은 무시. */
+export function addComment(memoId: string, text: string) {
+  const t = text.trim();
+  if (!t) return;
+  const comment: Comment = {
+    id: `cmt_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}`,
+    memoId,
+    author: "나",
+    mine: true,
+    text: t,
+    time: "방금",
+    createdAt: Date.now(),
+  };
+  setState({ comments: [...state.comments, comment] });
+}
+
+/** 코멘트를 삭제한다(목업: 내 코멘트만 UI에서 × 노출). */
+export function deleteComment(id: string) {
+  setState({ comments: state.comments.filter((c) => c.id !== id) });
 }
