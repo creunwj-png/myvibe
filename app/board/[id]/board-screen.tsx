@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Check, Copy, Home, Link2, Send, Share2, X } from "lucide-react";
 import { sharedMemosOf, useStore, type Memo } from "../../lib/store";
@@ -22,6 +22,21 @@ export function BoardScreen({ name }: { name: string }) {
   const { commentsFor, add, remove } = useBoardComments(name);
   const projectHref = `/project/${encodeURIComponent(name)}`;
   const [shareOpen, setShareOpen] = useState(false);
+
+  // 프로젝트 화면에서 공유 메모를 탭하면 #memo-<id>로 들어온다.
+  // 해당 카드로 스크롤하고 잠깐 강조해 "어떤 메모인지" 바로 보이게 한다.
+  const [highlightId, setHighlightId] = useState<string | null>(null);
+  useEffect(() => {
+    const m = window.location.hash.match(/^#memo-(.+)$/);
+    if (!m) return;
+    const id = decodeURIComponent(m[1]);
+    setHighlightId(id);
+    document
+      .getElementById(`memo-${id}`)
+      ?.scrollIntoView({ behavior: "smooth", block: "center" });
+    const t = setTimeout(() => setHighlightId(null), 2400);
+    return () => clearTimeout(t);
+  }, []);
 
   return (
     <main className="flex flex-1 flex-col bg-white">
@@ -75,6 +90,7 @@ export function BoardScreen({ name }: { name: string }) {
                     comments={commentsFor(m.id)}
                     onAdd={add}
                     onDelete={remove}
+                    highlight={highlightId === m.id}
                   />
                 ))}
               </div>
@@ -201,11 +217,13 @@ function BoardCard({
   comments,
   onAdd,
   onDelete,
+  highlight,
 }: {
   memo: Memo;
   comments: BoardComment[];
   onAdd: (memoId: string, text: string) => void;
   onDelete: (id: string) => void;
+  highlight?: boolean;
 }) {
   const [draft, setDraft] = useState("");
 
@@ -217,7 +235,14 @@ function BoardCard({
   }
 
   return (
-    <div className="rounded-xl border border-[#e5e5e5] bg-white">
+    <div
+      id={`memo-${memo.id}`}
+      className={`scroll-mt-4 rounded-xl border bg-white transition-[box-shadow,border-color] duration-300 ${
+        highlight
+          ? "border-[#2196f3] shadow-[0_0_0_3px_rgba(33,150,243,0.25)]"
+          : "border-[#e5e5e5]"
+      }`}
+    >
       {/* 공유된 메모 본문 — 탭하면 원문(S006) */}
       <Link
         href={`/memo/${memo.id}`}

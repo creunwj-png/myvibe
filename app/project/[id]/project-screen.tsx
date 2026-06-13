@@ -24,6 +24,7 @@ import {
   useStore,
   type Memo,
 } from "../../lib/store";
+import { useBoardComments } from "../../lib/board-comments";
 
 /**
  * S005 프로젝트 상세.
@@ -36,6 +37,9 @@ export function ProjectScreen({ name }: { name: string }) {
   const s = useStore();
   const memos = memosOf(s, isUnclassified ? null : name);
   const sharedCount = sharedCountOf(s, isUnclassified ? null : name);
+  // 공유 메모 삭제 경고에서 "댓글 N개"를 보여주려면 보드 댓글이 필요하다.
+  // 보드 화면과 같은 board_key(프로젝트명)로 읽어 원소스를 공유한다.
+  const { commentsFor } = useBoardComments(name);
 
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -242,7 +246,12 @@ export function ProjectScreen({ name }: { name: string }) {
                 </p>
               ) : null}
               {visible.map((m) => (
-                <MemoCard key={m.id} memo={m} />
+                <MemoCard
+                  key={m.id}
+                  memo={m}
+                  boardName={name}
+                  commentCount={m.shared ? commentsFor(m.id).length : 0}
+                />
               ))}
             </div>
           )}
@@ -313,12 +322,25 @@ export function ProjectScreen({ name }: { name: string }) {
   );
 }
 
-function MemoCard({ memo }: { memo: Memo }) {
+function MemoCard({
+  memo,
+  boardName,
+  commentCount,
+}: {
+  memo: Memo;
+  boardName: string;
+  commentCount: number;
+}) {
   const [confirm, setConfirm] = useState(false);
+  // 팀 보드에 공유된 메모는 원본(S006)이 아니라 팀 보드의 해당 메모로 보낸다.
+  // 그래야 메모와 그 위에 달린 팀 코멘트를 한 곳(원소스)에서 본다.
+  const href = memo.shared
+    ? `/board/${encodeURIComponent(boardName)}#memo-${memo.id}`
+    : `/memo/${memo.id}`;
   return (
     <div className="relative">
       <Link
-        href={`/memo/${memo.id}`}
+        href={href}
         className="block rounded-xl border border-[#ffb74d] bg-[#fff4e6] py-3.5 pl-4 pr-12 text-left transition-colors hover:bg-[#ffedd6] active:bg-[#ffe3bf]"
       >
         <p className="line-clamp-2 text-[16px] font-medium leading-[1.5] text-[#5d4037]">
@@ -358,6 +380,19 @@ function MemoCard({ memo }: { memo: Memo }) {
             <p className="text-center text-[16px] font-medium text-[#222222]">
               이 메모를 삭제할까요?
             </p>
+            {memo.shared ? (
+              <p className="mt-1.5 text-center text-[13px] leading-[1.5] text-[#666666]">
+                팀 보드에 공유된 메모예요
+                {commentCount > 0 ? (
+                  <>
+                    . 달린 댓글 <b className="font-bold text-[#e02000]">{commentCount}개</b>도
+                    팀 보드에서 함께 사라져요.
+                  </>
+                ) : (
+                  ". 삭제하면 팀 보드에서도 사라져요."
+                )}
+              </p>
+            ) : null}
             <div className="mt-5 flex gap-2">
               <button
                 type="button"
