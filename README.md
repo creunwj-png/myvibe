@@ -8,7 +8,7 @@
 
 ## 🔗 라이브 데모
 
-**https://your-app.vercel.app** _(배포 URL로 교체 예정)_
+**https://myvibe-eight.vercel.app**
 
 > 모바일 화면(폭 ~480px) 기준으로 디자인된 목업입니다. 휴대폰 또는 브라우저를 좁게 보면 가장 자연스럽습니다.
 
