@@ -304,7 +304,7 @@ function MemoCard({ memo }: { memo: Memo }) {
         className="block rounded-xl border border-[#ffb74d] bg-[#fff4e6] py-3.5 pl-4 pr-12 text-left transition-colors hover:bg-[#ffedd6] active:bg-[#ffe3bf]"
       >
         <p className="line-clamp-2 text-[16px] font-medium leading-[1.5] text-[#5d4037]">
-          {memo.text}
+          {memo.text.replace(/\s+/g, " ").trim()}
         </p>
         <div className="mt-2 flex items-center justify-between">
           <span className="text-[13px] text-[#b07a4e]">{memo.time}</span>
