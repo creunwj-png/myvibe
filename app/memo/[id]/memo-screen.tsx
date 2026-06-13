@@ -2,8 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
+  Check,
   ChevronDown,
   Home,
   MoreVertical,
@@ -36,6 +38,7 @@ function projectHref(project: string | null) {
  * docs/mockups/screens.md S006 기준.
  */
 export function MemoScreen({ id }: { id: string }) {
+  const router = useRouter();
   const s = useStore();
   const memo = getMemo(s, id);
 
@@ -123,6 +126,10 @@ export function MemoScreen({ id }: { id: string }) {
   function finishEdit() {
     updateMemoText(id, text);
     setEditing(false);
+  }
+  function saveAndBack() {
+    if (editing) updateMemoText(id, text);
+    router.push(projectHref(memo!.project));
   }
   function chooseProject(opt: string) {
     reclassifyMemo(id, opt === UNCLASSIFIED_LABEL ? null : opt);
@@ -272,11 +279,19 @@ export function MemoScreen({ id }: { id: string }) {
           </div>
         </div>
 
-        {/* 하단 고정 — 팀에 공유하기 */}
-        <div className="shrink-0 border-t border-[#f0f0f0] p-4">
+        {/* 하단 고정 — 저장하기 / 팀에 공유하기 */}
+        <div className="flex shrink-0 gap-2 border-t border-[#f0f0f0] p-4">
+          <button
+            type="button"
+            onClick={saveAndBack}
+            className="flex h-[54px] flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#fee500] text-[16px] font-bold text-[#1e1e1e] transition-transform duration-150 active:scale-[0.99]"
+          >
+            <Check size={18} />
+            저장하기
+          </button>
           <Link
             href={`/share/${id}`}
-            className="flex h-[54px] items-center justify-center gap-1.5 rounded-xl bg-[#fee500] text-[16px] font-bold text-[#1e1e1e] transition-transform duration-150 active:scale-[0.99]"
+            className="flex h-[54px] flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#1e1e1e] text-[16px] font-bold text-white transition-transform duration-150 active:scale-[0.99]"
           >
             <Share2 size={18} />
             팀에 공유하기
