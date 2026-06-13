@@ -279,8 +279,15 @@ export function MemoScreen({ id }: { id: string }) {
           </div>
         </div>
 
-        {/* 하단 고정 — 저장하기 / 팀에 공유하기 */}
+        {/* 하단 고정 — 팀에 공유하기 / 저장하기 */}
         <div className="flex shrink-0 gap-2 border-t border-[#f0f0f0] p-4">
+          <Link
+            href={`/share/${id}`}
+            className="flex h-[54px] flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#1e1e1e] text-[16px] font-bold text-white transition-transform duration-150 active:scale-[0.99]"
+          >
+            <Share2 size={18} />
+            팀에 공유하기
+          </Link>
           <button
             type="button"
             onClick={saveAndBack}
@@ -289,13 +296,6 @@ export function MemoScreen({ id }: { id: string }) {
             <Check size={18} />
             저장하기
           </button>
-          <Link
-            href={`/share/${id}`}
-            className="flex h-[54px] flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#1e1e1e] text-[16px] font-bold text-white transition-transform duration-150 active:scale-[0.99]"
-          >
-            <Share2 size={18} />
-            팀에 공유하기
-          </Link>
         </div>
       </div>
 
