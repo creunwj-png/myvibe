@@ -1,9 +1,7 @@
 import { ImageResponse } from "next/og";
 
 // 공유 미리보기(OG) 이미지 — 1200x630 브랜드 카드.
-// 런타임에 생성(빌드 시 외부 폰트 fetch 회피).
-export const dynamic = "force-dynamic";
-
+// 빌드 시 정적 생성 → CDN에서 즉시 응답(카카오 등 크롤러 타임아웃 대응).
 export const alt = "톡캐치 — 떠오르면 툭, 정리는 알아서.";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
