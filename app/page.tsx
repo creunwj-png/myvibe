@@ -37,6 +37,9 @@ export default function WelcomePage() {
         <p className="mt-4 text-center text-[13px] leading-[1.54] text-[#999999]">
           로그인 없이 시작
         </p>
+        <p className="mt-2 text-center text-[11px] leading-none text-[#cccccc]">
+          v{process.env.NEXT_PUBLIC_APP_VERSION} · {process.env.NEXT_PUBLIC_APP_COMMIT}
+        </p>
       </div>
     </main>
   );
