@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
+  ChevronRight,
   MoreVertical,
   Pencil,
   Plus,
@@ -19,6 +20,7 @@ import {
   deleteProject,
   memosOf,
   renameProject,
+  sharedCountOf,
   useStore,
   type Memo,
 } from "../../lib/store";
@@ -33,6 +35,7 @@ export function ProjectScreen({ name }: { name: string }) {
   const isUnclassified = name === "미분류";
   const s = useStore();
   const memos = memosOf(s, isUnclassified ? null : name);
+  const sharedCount = sharedCountOf(s, isUnclassified ? null : name);
 
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -218,6 +221,21 @@ export function ProjectScreen({ name }: { name: string }) {
             </p>
           ) : (
             <div className="flex flex-col gap-2.5 px-4 pt-2 pb-2">
+              {!q && sharedCount > 0 ? (
+                <Link
+                  href={`/board/${encodeURIComponent(name)}`}
+                  className="flex items-center gap-2.5 rounded-xl border border-[#e5e5e5] bg-white px-4 py-3 transition-colors hover:bg-[#f8f8f8] active:bg-[#f0f0f0]"
+                >
+                  <Share2 size={18} className="shrink-0 text-[#2196f3]" />
+                  <span className="flex-1 text-[15px] font-medium text-[#222222]">
+                    팀 보드 보기
+                  </span>
+                  <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#e8f3fe] px-1.5 text-[12px] font-bold text-[#2196f3]">
+                    {sharedCount}
+                  </span>
+                  <ChevronRight size={18} className="text-[#cccccc]" />
+                </Link>
+              ) : null}
               {q ? (
                 <p className="text-[13px] text-[#999999]">
                   &apos;{q}&apos; 결과 {visible.length}

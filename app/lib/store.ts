@@ -122,6 +122,18 @@ export function countOf(s: State, project: string | null): number {
   return s.memos.filter((m) => m.project === project).length;
 }
 
+/** 한 프로젝트의 팀 보드 = 그 프로젝트에서 공유한 메모(shared)들. 최근 공유순. */
+export function sharedMemosOf(s: State, project: string | null): Memo[] {
+  return s.memos
+    .filter((m) => m.project === project && m.shared)
+    .sort((a, b) => b.createdAt - a.createdAt);
+}
+
+/** 팀 보드 진입 노출/배지용: 그 프로젝트의 공유 메모 수. */
+export function sharedCountOf(s: State, project: string | null): number {
+  return s.memos.filter((m) => m.project === project && m.shared).length;
+}
+
 /** 홈 표시용: 프로젝트를 최근 활동순(프로젝트 내 최신 메모 기준)으로 정렬. */
 export function projectsByRecency(s: State): { name: string; count: number }[] {
   const lastActivity = (name: string) => {

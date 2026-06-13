@@ -83,12 +83,20 @@ export function ShareScreen({
         <p className="mt-2 text-[15px] leading-[1.5] text-[#666666]">
           팀원이 코멘트로 함께 키워가요.
         </p>
-        <Link
-          href="/home"
-          className="mt-8 inline-flex h-12 items-center justify-center rounded-xl border border-[#e5e5e5] px-6 text-[15px] font-medium text-[#333333] transition-colors hover:bg-[#f8f8f8]"
-        >
-          홈으로
-        </Link>
+        <div className="mt-8 flex items-center gap-2">
+          <Link
+            href={`/board/${encodeURIComponent(memo.project ?? "미분류")}`}
+            className="inline-flex h-12 items-center justify-center rounded-xl border border-[#1e1e1e] px-6 text-[15px] font-bold text-[#1e1e1e] transition-colors hover:bg-[#f8f8f8]"
+          >
+            보드 보기
+          </Link>
+          <Link
+            href="/home"
+            className="inline-flex h-12 items-center justify-center rounded-xl border border-[#e5e5e5] px-6 text-[15px] font-medium text-[#333333] transition-colors hover:bg-[#f8f8f8]"
+          >
+            홈으로
+          </Link>
+        </div>
       </main>
     );
   }
