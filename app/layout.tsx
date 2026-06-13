@@ -12,9 +12,25 @@ const notoSansKr = Noto_Sans_KR({
   preload: false,
 });
 
+const SITE_DESCRIPTION =
+  "키워드만 던지면 AI가 프로젝트로 정리해드려요.";
+
 export const metadata: Metadata = {
-  title: "톡캐치",
-  description: "떠오르면 툭, 정리는 알아서. 키워드만 던지면 AI가 프로젝트로 정리해드려요.",
+  metadataBase: new URL("https://myvibe-eight.vercel.app"),
+  title: "톡캐치 — 떠오르면 툭, 정리는 알아서.",
+  description: SITE_DESCRIPTION,
+  openGraph: {
+    title: "톡캐치 — 떠오르면 툭, 정리는 알아서.",
+    description: SITE_DESCRIPTION,
+    type: "website",
+    locale: "ko_KR",
+    siteName: "톡캐치",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "톡캐치 — 떠오르면 툭, 정리는 알아서.",
+    description: SITE_DESCRIPTION,
+  },
 };
 
 export default function RootLayout({
