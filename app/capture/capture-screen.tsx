@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Folder, Mic, X } from "lucide-react";
+import { ArrowRight, Mic, X } from "lucide-react";
+import { ProjectIcon } from "../lib/project-icon";
 
 /**
  * S002 캡처 화면 — "1초에 던진다"의 심장.
@@ -56,7 +57,7 @@ export function CaptureScreen({ project }: { project?: string }) {
           </button>
           {project ? (
             <span className="flex items-center gap-1.5 text-[13px] leading-[1.54] text-[#666666]">
-              <Folder size={15} className="text-[#999999]" />
+              <ProjectIcon name={project} size={15} className="text-[#999999]" />
               {project}에 던지는 중
             </span>
           ) : null}
