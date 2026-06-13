@@ -43,7 +43,8 @@
 
 - **Next.js 16** (App Router) · **React 19** · **TypeScript**
 - **Tailwind CSS v4** · **lucide-react** 아이콘 · **Noto Sans KR**
-- 상태: 클라이언트 공용 스토어(`useSyncExternalStore` + `localStorage`) — **백엔드 없음**
+- 상태: 클라이언트 공용 스토어(`useSyncExternalStore` + `localStorage`) — 메모·프로젝트는 로컬
+- **팀 보드 댓글만 Supabase**(`@supabase/supabase-js`)에 저장 → 사람·기기 간 동기화. env(`NEXT_PUBLIC_SUPABASE_URL`/`…PUBLISHABLE_KEY`) 없으면 로컬로 폴백
 
 ## 🚀 실행
 
@@ -63,9 +64,10 @@ npm run lint    # 린트
 
 프론트엔드 목업입니다. 실제 서비스가 아니라 다음은 의도적으로 더미/로컬로 처리됩니다.
 
-- **데이터는 브라우저 `localStorage`에 저장** — 기기·브라우저마다 따로 보관되고 서버 동기화는 없습니다.
+- **메모·프로젝트는 브라우저 `localStorage`에 저장** — 기기·브라우저마다 따로 보관됩니다.
+- **팀 보드 댓글은 Supabase에 저장** — 공유 링크로 들어온 사람이 단 댓글이 팀 보드에 동기화됩니다(익명 공개 정책 — 데모 수준).
 - **AI 매칭은 더미 추천** — 실제 추론 대신 기존 프로젝트를 후보로 제시합니다.
-- **로그인/공유는 UI 흐름만** — 실제 인증·팀 보드 연동은 없습니다.
+- **로그인/공유는 UI 흐름만** — 카카오 로그인은 UI 목업이라 실제 계정을 구분하지 않습니다.
 
 데이터를 초기화하려면 브라우저 콘솔에서:
 
