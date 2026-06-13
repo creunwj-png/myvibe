@@ -38,7 +38,8 @@ export default function WelcomePage() {
           로그인 없이 시작
         </p>
         <p className="mt-2 text-center text-[11px] leading-none text-[#cccccc]">
-          v{process.env.NEXT_PUBLIC_APP_VERSION} · {process.env.NEXT_PUBLIC_APP_COMMIT}
+          © {new Date().getFullYear()} 톡캐치 · v
+          {process.env.NEXT_PUBLIC_APP_VERSION} · {process.env.NEXT_PUBLIC_APP_COMMIT}
         </p>
       </div>
     </main>
