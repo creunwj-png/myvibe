@@ -11,9 +11,11 @@ import {
   Search,
   Share2,
   Trash2,
+  X,
 } from "lucide-react";
 import { ProjectIcon } from "../../lib/project-icon";
 import {
+  deleteMemo,
   deleteProject,
   memosOf,
   renameProject,
@@ -146,12 +148,10 @@ export function ProjectScreen({ name }: { name: string }) {
               </>
             ) : (
               <>
-                <ProjectIcon
-                  name={name}
-                  size={20}
-                  className="ml-1 shrink-0 text-[#808080]"
-                />
-                <h1 className="min-w-0 flex-1 truncate text-[20px] font-bold text-[#1e1e1e]">
+                <span className="ml-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#1e1e1e] bg-white text-[#1e1e1e]">
+                  <ProjectIcon name={name} size={20} />
+                </span>
+                <h1 className="ml-2 min-w-0 flex-1 truncate text-[20px] font-bold text-[#1e1e1e]">
                   {name}
                 </h1>
                 {memos.length > 0 ? (
@@ -296,24 +296,73 @@ export function ProjectScreen({ name }: { name: string }) {
 }
 
 function MemoCard({ memo }: { memo: Memo }) {
+  const [confirm, setConfirm] = useState(false);
   return (
-    <Link
-      href={`/memo/${memo.id}`}
-      className="block rounded-xl border border-[#e5e5e5] bg-white px-4 py-3.5 text-left transition-colors hover:bg-[#f8f8f8] active:bg-[#f0f0f0]"
-    >
-      <p className="line-clamp-2 text-[16px] leading-[1.5] text-[#333333]">
-        {memo.text}
-      </p>
-      <div className="mt-2 flex items-center justify-between">
-        <span className="text-[13px] text-[#999999]">{memo.time}</span>
-        {memo.shared ? (
-          <span className="flex items-center gap-1 text-[12px] font-medium text-[#2196f3]">
-            <Share2 size={13} />
-            공유됨
-          </span>
-        ) : null}
-      </div>
-    </Link>
+    <div className="relative">
+      <Link
+        href={`/memo/${memo.id}`}
+        className="block rounded-xl border border-[#ffb74d] bg-[#fff4e6] py-3.5 pl-4 pr-12 text-left transition-colors hover:bg-[#ffedd6] active:bg-[#ffe3bf]"
+      >
+        <p className="line-clamp-2 text-[16px] font-medium leading-[1.5] text-[#5d4037]">
+          {memo.text}
+        </p>
+        <div className="mt-2 flex items-center justify-between">
+          <span className="text-[13px] text-[#b07a4e]">{memo.time}</span>
+          {memo.shared ? (
+            <span className="flex items-center gap-1 text-[12px] font-bold text-[#d97706]">
+              <Share2 size={13} />
+              공유됨
+            </span>
+          ) : null}
+        </div>
+      </Link>
+
+      {/* 목록에서 바로 삭제 */}
+      <button
+        type="button"
+        onClick={() => setConfirm(true)}
+        aria-label="메모 삭제"
+        className="absolute right-1.5 top-1.5 flex h-8 w-8 items-center justify-center rounded-full text-[#c08a5a] transition-colors hover:bg-[#ffe3bf] hover:text-[#8a5a30]"
+      >
+        <X size={18} />
+      </button>
+
+      {confirm ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-8">
+          <button
+            type="button"
+            aria-label="취소"
+            tabIndex={-1}
+            onClick={() => setConfirm(false)}
+            className="absolute inset-0 cursor-default bg-black/40"
+          />
+          <div className="relative w-full max-w-[320px] rounded-2xl bg-white p-5 shadow-[0px_4px_12px_rgba(0,0,0,0.12)]">
+            <p className="text-center text-[16px] font-medium text-[#222222]">
+              이 메모를 삭제할까요?
+            </p>
+            <div className="mt-5 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setConfirm(false)}
+                className="h-12 flex-1 rounded-xl border border-[#e5e5e5] text-[15px] font-medium text-[#333333] transition-colors hover:bg-[#f8f8f8]"
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setConfirm(false);
+                  deleteMemo(memo.id);
+                }}
+                className="h-12 flex-1 rounded-xl bg-[#e02000] text-[15px] font-bold text-white transition-transform duration-150 active:scale-[0.99]"
+              >
+                삭제
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </div>
   );
 }
 
