@@ -215,6 +215,22 @@ export function renameProject(oldName: string, newName: string) {
   setState({ projects, memos });
 }
 
+/**
+ * 빈 프로젝트를 만든다. 이미 있으면 그대로 둔다.
+ * 반환: 정리된 프로젝트명(빈 문자열이면 생성 안 됨).
+ */
+export function addProject(name: string): string {
+  const n = name.trim();
+  if (!n || n === "미분류" || n === "분류 없음") return "";
+  if (!state.projects.some((p) => p.name === n)) {
+    setState({
+      projects: [...state.projects, { name: n, createdAt: Date.now() }],
+      memos: state.memos,
+    });
+  }
+  return n;
+}
+
 /** 프로젝트를 삭제한다. 안에 있던 메모는 잃지 않고 미분류로 옮긴다. */
 export function deleteProject(name: string) {
   setState({

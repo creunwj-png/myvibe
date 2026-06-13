@@ -7,6 +7,7 @@ import {
   ArrowLeft,
   Check,
   ChevronRight,
+  FolderPlus,
   Home,
   Inbox,
   Plus,
@@ -16,6 +17,7 @@ import {
 } from "lucide-react";
 import { ProjectIcon } from "../lib/project-icon";
 import {
+  addProject,
   countOf,
   projectsByRecency,
   searchMemos,
@@ -42,6 +44,21 @@ export function HomeScreen({ saved }: { saved?: string }) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
+
+  const [creating, setCreating] = useState(false);
+  const [newName, setNewName] = useState("");
+  const newNameRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (creating) newNameRef.current?.focus();
+  }, [creating]);
+
+  function submitNewProject() {
+    const created = addProject(newName);
+    setCreating(false);
+    setNewName("");
+    if (created) router.push(`/project/${encodeURIComponent(created)}`);
+  }
 
   // 확인 토스트 자동 dismiss (짧고 따뜻하게)
   useEffect(() => {
@@ -166,10 +183,21 @@ export function HomeScreen({ saved }: { saved?: string }) {
 
         {/* 하단 고정 캡처 CTA */}
         {!searchOpen ? (
-          <div className="shrink-0 border-t border-[#f0f0f0] p-4">
+          <div className="flex shrink-0 gap-2 border-t border-[#f0f0f0] p-4">
+            <button
+              type="button"
+              onClick={() => {
+                setNewName("");
+                setCreating(true);
+              }}
+              className="flex h-[54px] flex-1 items-center justify-center gap-1.5 rounded-xl border border-[#e5e5e5] text-[16px] font-bold text-[#333333] transition-colors hover:bg-[#f8f8f8]"
+            >
+              <FolderPlus size={20} />
+              프로젝트 만들기
+            </button>
             <Link
               href="/capture"
-              className="flex h-[54px] items-center justify-center gap-1.5 rounded-xl bg-[#fee500] text-[16px] font-bold text-[#1e1e1e] transition-transform duration-150 active:scale-[0.99]"
+              className="flex h-[54px] flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#fee500] text-[16px] font-bold text-[#1e1e1e] transition-transform duration-150 active:scale-[0.99]"
             >
               <Plus size={20} />
               아이디어 던지기
@@ -177,6 +205,57 @@ export function HomeScreen({ saved }: { saved?: string }) {
           </div>
         ) : null}
       </div>
+
+      {/* 새 프로젝트 만들기 */}
+      {creating ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-8">
+          <button
+            type="button"
+            aria-label="취소"
+            tabIndex={-1}
+            onClick={() => setCreating(false)}
+            className="absolute inset-0 cursor-default bg-black/40"
+          />
+          <div className="relative w-full max-w-[320px] rounded-2xl bg-white p-5 shadow-[0px_4px_12px_rgba(0,0,0,0.12)]">
+            <p className="text-[16px] font-bold text-[#222222]">
+              새 프로젝트 만들기
+            </p>
+            <input
+              ref={newNameRef}
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") submitNewProject();
+                if (e.key === "Escape") setCreating(false);
+              }}
+              placeholder="예: 결제개편"
+              aria-label="새 프로젝트 이름"
+              className="mt-4 h-[52px] w-full rounded-xl border border-[#e5e5e5] px-4 text-[16px] text-[#222222] outline-none transition-colors placeholder:text-[#bbbbbb] focus:border-[#333333]"
+            />
+            <div className="mt-5 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setCreating(false)}
+                className="h-12 flex-1 rounded-xl border border-[#e5e5e5] text-[15px] font-medium text-[#333333] transition-colors hover:bg-[#f8f8f8]"
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                onClick={submitNewProject}
+                disabled={!newName.trim()}
+                className={`h-12 flex-1 rounded-xl bg-[#fee500] text-[15px] font-bold text-[#1e1e1e] transition-[transform,opacity] duration-150 ${
+                  newName.trim()
+                    ? "opacity-100 active:scale-[0.99]"
+                    : "cursor-not-allowed opacity-50"
+                }`}
+              >
+                만들기
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </main>
   );
 }
