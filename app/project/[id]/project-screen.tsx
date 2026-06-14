@@ -80,6 +80,23 @@ export function ProjectScreen({ name }: { name: string }) {
     router.push("/home");
   }
 
+  // 삭제 확인창이 열려 있을 때 엔터로 삭제, ESC로 취소(마우스 없이도 진행).
+  useEffect(() => {
+    if (!confirmDelete) return;
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        deleteNow();
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        setConfirmDelete(false);
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [confirmDelete]);
+
   const q = query.trim();
   const visible = q ? memos.filter((m) => m.text.includes(q)) : memos;
 
@@ -332,6 +349,22 @@ function MemoCard({
   commentCount: number;
 }) {
   const [confirm, setConfirm] = useState(false);
+  // 삭제 확인창이 열려 있을 때 엔터로 삭제, ESC로 취소(마우스 없이도 진행).
+  useEffect(() => {
+    if (!confirm) return;
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        setConfirm(false);
+        deleteMemo(memo.id);
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        setConfirm(false);
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [confirm, memo.id]);
   // 팀 보드에 공유된 메모는 원본(S006)이 아니라 팀 보드의 해당 메모로 보낸다.
   // 그래야 메모와 그 위에 달린 팀 코멘트를 한 곳(원소스)에서 본다.
   const href = memo.shared

@@ -141,6 +141,23 @@ export function MemoScreen({ id }: { id: string }) {
     deleteMemo(id);
   }
 
+  // 삭제 확인창이 열려 있을 때 엔터로 삭제, ESC로 취소(마우스 없이도 진행).
+  useEffect(() => {
+    if (!confirmDelete) return;
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        confirmDeleteNow();
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        setConfirmDelete(false);
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [confirmDelete]);
+
   return (
     <main className="relative flex flex-1 flex-col bg-white">
       <div className="mx-auto flex w-full max-w-[480px] flex-1 flex-col">
