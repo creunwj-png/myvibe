@@ -58,6 +58,8 @@ export function ProjectScreen({ name }: { name: string }) {
   const [renameValue, setRenameValue] = useState(name);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const renameRef = useRef<HTMLInputElement>(null);
+  const cancelRef = useRef<HTMLButtonElement>(null);
+  const deleteRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (renaming) {
@@ -80,13 +82,17 @@ export function ProjectScreen({ name }: { name: string }) {
     router.push("/home");
   }
 
-  // 삭제 확인창이 열려 있을 때 엔터로 삭제, ESC로 취소(마우스 없이도 진행).
+  // 삭제 확인창: 열리면 삭제에 포커스(엔터=삭제), 화살표로 취소↔삭제 이동, ESC로 취소.
   useEffect(() => {
     if (!confirmDelete) return;
+    deleteRef.current?.focus();
     function onKeyDown(e: KeyboardEvent) {
-      if (e.key === "Enter") {
+      if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
         e.preventDefault();
-        deleteNow();
+        cancelRef.current?.focus();
+      } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+        e.preventDefault();
+        deleteRef.current?.focus();
       } else if (e.key === "Escape") {
         e.preventDefault();
         setConfirmDelete(false);
@@ -94,7 +100,6 @@ export function ProjectScreen({ name }: { name: string }) {
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [confirmDelete]);
 
   const q = query.trim();
@@ -318,16 +323,18 @@ export function ProjectScreen({ name }: { name: string }) {
             </p>
             <div className="mt-5 flex gap-2">
               <button
+                ref={cancelRef}
                 type="button"
                 onClick={() => setConfirmDelete(false)}
-                className="h-12 flex-1 rounded-xl border border-[#e5e5e5] text-[15px] font-medium text-[#333333] transition-colors hover:bg-[#f8f8f8]"
+                className="h-12 flex-1 rounded-xl border border-[#e5e5e5] text-[15px] font-medium text-[#333333] transition-colors hover:bg-[#f8f8f8] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#999999] focus-visible:ring-offset-2"
               >
                 취소
               </button>
               <button
+                ref={deleteRef}
                 type="button"
                 onClick={deleteNow}
-                className="h-12 flex-1 rounded-xl bg-[#e02000] text-[15px] font-bold text-white transition-transform duration-150 active:scale-[0.99]"
+                className="h-12 flex-1 rounded-xl bg-[#e02000] text-[15px] font-bold text-white transition-transform duration-150 active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#e02000] focus-visible:ring-offset-2"
               >
                 삭제
               </button>
@@ -349,14 +356,19 @@ function MemoCard({
   commentCount: number;
 }) {
   const [confirm, setConfirm] = useState(false);
-  // 삭제 확인창이 열려 있을 때 엔터로 삭제, ESC로 취소(마우스 없이도 진행).
+  const cancelRef = useRef<HTMLButtonElement>(null);
+  const deleteRef = useRef<HTMLButtonElement>(null);
+  // 삭제 확인창: 열리면 삭제에 포커스(엔터=삭제), 화살표로 취소↔삭제 이동, ESC로 취소.
   useEffect(() => {
     if (!confirm) return;
+    deleteRef.current?.focus();
     function onKeyDown(e: KeyboardEvent) {
-      if (e.key === "Enter") {
+      if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
         e.preventDefault();
-        setConfirm(false);
-        deleteMemo(memo.id);
+        cancelRef.current?.focus();
+      } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+        e.preventDefault();
+        deleteRef.current?.focus();
       } else if (e.key === "Escape") {
         e.preventDefault();
         setConfirm(false);
@@ -364,7 +376,7 @@ function MemoCard({
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [confirm, memo.id]);
+  }, [confirm]);
   // 팀 보드에 공유된 메모는 원본(S006)이 아니라 팀 보드의 해당 메모로 보낸다.
   // 그래야 메모와 그 위에 달린 팀 코멘트를 한 곳(원소스)에서 본다.
   const href = memo.shared
@@ -428,19 +440,21 @@ function MemoCard({
             ) : null}
             <div className="mt-5 flex gap-2">
               <button
+                ref={cancelRef}
                 type="button"
                 onClick={() => setConfirm(false)}
-                className="h-12 flex-1 rounded-xl border border-[#e5e5e5] text-[15px] font-medium text-[#333333] transition-colors hover:bg-[#f8f8f8]"
+                className="h-12 flex-1 rounded-xl border border-[#e5e5e5] text-[15px] font-medium text-[#333333] transition-colors hover:bg-[#f8f8f8] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#999999] focus-visible:ring-offset-2"
               >
                 취소
               </button>
               <button
+                ref={deleteRef}
                 type="button"
                 onClick={() => {
                   setConfirm(false);
                   deleteMemo(memo.id);
                 }}
-                className="h-12 flex-1 rounded-xl bg-[#e02000] text-[15px] font-bold text-white transition-transform duration-150 active:scale-[0.99]"
+                className="h-12 flex-1 rounded-xl bg-[#e02000] text-[15px] font-bold text-white transition-transform duration-150 active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#e02000] focus-visible:ring-offset-2"
               >
                 삭제
               </button>
