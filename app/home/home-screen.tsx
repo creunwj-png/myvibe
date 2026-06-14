@@ -15,6 +15,7 @@ import {
   Settings,
   Share2,
   Sparkles,
+  Trash2,
 } from "lucide-react";
 import { ProjectIcon } from "../lib/project-icon";
 import {
@@ -143,6 +144,14 @@ export function HomeScreen({ saved }: { saved?: string }) {
                   <Search size={22} />
                 </button>
               ) : null}
+              <Link
+                href="/trash"
+                aria-label="휴지통"
+                title="휴지통"
+                className="flex h-11 w-11 items-center justify-center rounded-full text-[#333333] transition-colors hover:bg-[#f8f8f8]"
+              >
+                <Trash2 size={22} />
+              </Link>
               <button
                 type="button"
                 aria-label="설정"
