@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>UX TF 결과 보고회 — 대표님 말씀 정리</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:        #101E33;
+    --ink-soft:   #46566E;
+    --ink-faint:  #7A8899;
+    --paper:      #F4F5F1;
+    --surface:    #FFFFFF;
+    --rule:       #DADDD4;
+    --rule-soft:  #E8EAE3;
+    --accent:     #0E6B5E;
+    --accent-wash:#E2EDE9;
+    --mark:       #A8790A;
+    --mark-wash:  #F6EFDC;
+
+    --display: "Gowun Batang", "Nanum Myeongjo", "Apple SD Gothic Neo", serif;
+    --body: "IBM Plex Sans KR", "Pretendard", -apple-system, BlinkMacSystemFont, "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+    --util: "IBM Plex Mono", "IBM Plex Sans KR", monospace;
+
+    --measure: 46rem;
+  }
+
+  *{ box-sizing:border-box; }
+
+  html{ scroll-behavior:smooth; scroll-padding-top:6rem; }
+
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--body);
+    font-weight:400;
+    font-size:16px;
+    line-height:1.75;
+    -webkit-font-smoothing:antialiased;
+    letter-spacing:-0.005em;
+  }
+
+  /* ---------- masthead ---------- */
+
+  .masthead{
+    border-bottom:1px solid var(--rule);
+    background:var(--surface);
+  }
+  .masthead-inner{
+    max-width:76rem;
+    margin:0 auto;
+    padding:3.5rem 2rem 3rem;
+  }
+  .eyebrow{
+    font-family:var(--util);
+    font-size:0.7rem;
+    font-weight:500;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin:0 0 1.25rem;
+  }
+  .masthead h1{
+    font-family:var(--display);
+    font-weight:700;
+    font-size:clamp(2rem, 5vw, 3.1rem);
+    line-height:1.2;
+    letter-spacing:-0.02em;
+    margin:0 0 0.9rem;
+  }
+  .meta{
+    font-family:var(--util);
+    font-size:0.78rem;
+    color:var(--ink-faint);
+    letter-spacing:0.02em;
+    margin:0;
+  }
+  .meta span{ white-space:nowrap; }
+  .meta i{ font-style:normal; color:var(--rule); padding:0 0.55rem; }
+
+  .thesis{
+    margin:2.75rem 0 0;
+    padding-top:2.25rem;
+    border-top:1px solid var(--rule-soft);
+    max-width:34rem;
+  }
+  .thesis p{
+    font-family:var(--display);
+    font-size:clamp(1.5rem, 3.6vw, 2.1rem);
+    line-height:1.5;
+    margin:0;
+    letter-spacing:-0.015em;
+  }
+  .thesis em{
+    font-style:normal;
+    color:var(--accent);
+    box-shadow:inset 0 -0.42em 0 var(--accent-wash);
+  }
+  .thesis .attrib{
+    font-family:var(--util);
+    font-size:0.72rem;
+    letter-spacing:0.1em;
+    color:var(--ink-faint);
+    margin-top:1.4rem;
+    display:block;
+  }
+
+  /* ---------- layout ---------- */
+
+  .shell{
+    max-width:76rem;
+    margin:0 auto;
+    padding:0 2rem 5rem;
+    display:grid;
+    grid-template-columns:13rem minmax(0,1fr);
+    gap:4rem;
+    align-items:start;
+  }
+
+  /* ---------- table of contents ---------- */
+
+  .toc{
+    position:sticky;
+    top:3rem;
+    padding-top:3.5rem;
+  }
+  .toc-title{
+    font-family:var(--util);
+    font-size:0.65rem;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:var(--ink-faint);
+    margin:0 0 1rem;
+    padding-bottom:0.75rem;
+    border-bottom:1px solid var(--rule);
+  }
+  .toc ol{ list-style:none; margin:0; padding:0; }
+  .toc li{ margin:0; }
+  .toc a{
+    display:block;
+    padding:0.42rem 0 0.42rem 0.85rem;
+    border-left:2px solid transparent;
+    font-size:0.855rem;
+    line-height:1.45;
+    color:var(--ink-soft);
+    text-decoration:none;
+    transition:color .18s ease, border-color .18s ease;
+  }
+  .toc a:hover{ color:var(--accent); }
+  .toc a.is-active{
+    color:var(--ink);
+    font-weight:600;
+    border-left-color:var(--accent);
+  }
+
+  /* ---------- sections ---------- */
+
+  main{ padding-top:3.5rem; max-width:var(--measure); }
+
+  .section{ margin-bottom:4rem; }
+  .section:last-of-type{ margin-bottom:2rem; }
+
+  .section-label{
+    font-family:var(--util);
+    font-size:0.68rem;
+    font-weight:500;
+    letter-spacing:0.2em;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin:0 0 0.5rem;
+  }
+  .section h2{
+    font-family:var(--display);
+    font-weight:700;
+    font-size:1.6rem;
+    line-height:1.35;
+    letter-spacing:-0.015em;
+    margin:0 0 1.5rem;
+    padding-bottom:0.9rem;
+    border-bottom:1px solid var(--rule);
+  }
+
+  .section ul{
+    list-style:none;
+    margin:0;
+    padding:0;
+  }
+  .section > ul > li{
+    position:relative;
+    padding-left:1.15rem;
+    margin-bottom:1rem;
+  }
+  .section > ul > li::before{
+    content:"";
+    position:absolute;
+    left:0; top:0.72em;
+    width:5px; height:5px;
+    border-radius:50%;
+    background:var(--ink-faint);
+  }
+  .section ul ul{
+    margin-top:0.7rem;
+    padding-left:0;
+    border-left:1px solid var(--rule);
+  }
+  .section ul ul li{
+    position:relative;
+    padding-left:1.1rem;
+    margin-bottom:0.5rem;
+    color:var(--ink-soft);
+    font-size:0.955rem;
+  }
+  .section ul ul li::before{
+    content:"";
+    position:absolute;
+    left:0; top:0.85em;
+    width:0.6rem; height:1px;
+    background:var(--rule);
+  }
+  .section ul ul li:last-child{ margin-bottom:0; }
+
+  strong{ font-weight:600; color:var(--ink); }
+
+  .gloss{
+    display:block;
+    font-size:0.85rem;
+    color:var(--ink-faint);
+    line-height:1.6;
+    margin-top:0.35rem;
+  }
+
+  /* ordered sub-list for the 비바샘 소회 */
+  ol.numbered{
+    counter-reset:n;
+    list-style:none;
+    margin:0.85rem 0 0;
+    padding:0;
+    border-left:1px solid var(--rule);
+  }
+  ol.numbered li{
+    counter-increment:n;
+    position:relative;
+    padding-left:2.1rem;
+    margin-bottom:0.6rem;
+    color:var(--ink-soft);
+    font-size:0.955rem;
+  }
+  ol.numbered li::before{
+    content:counter(n);
+    position:absolute;
+    left:0.9rem; top:0.05em;
+    font-family:var(--util);
+    font-size:0.72rem;
+    color:var(--accent);
+  }
+  ol.numbered li:last-child{ margin-bottom:0; }
+
+  /* ---------- criterion tag ---------- */
+
+  .criterion{
+    display:inline-block;
+    font-family:var(--util);
+    font-size:0.72rem;
+    letter-spacing:0.06em;
+    color:var(--mark);
+    background:var(--mark-wash);
+    padding:0.1rem 0.45rem;
+    border-radius:2px;
+    white-space:nowrap;
+  }
+
+  /* ---------- footer ---------- */
+
+  .colophon{
+    max-width:76rem;
+    margin:0 auto;
+    padding:2rem;
+    border-top:1px solid var(--rule);
+    font-family:var(--util);
+    font-size:0.72rem;
+    line-height:1.9;
+    color:var(--ink-faint);
+    letter-spacing:0.02em;
+  }
+  .colophon p{ margin:0; }
+
+  /* ---------- responsive ---------- */
+
+  @media (max-width: 900px){
+    .masthead-inner{ padding:2.5rem 1.5rem 2.25rem; }
+    .shell{
+      grid-template-columns:1fr;
+      gap:0;
+      padding:0 1.5rem 3.5rem;
+    }
+    .toc{
+      position:sticky;
+      top:0;
+      z-index:10;
+      padding:0;
+      margin:0 -1.5rem;
+      background:rgba(244,245,241,0.94);
+      backdrop-filter:blur(8px);
+      border-bottom:1px solid var(--rule);
+    }
+    .toc-title{ display:none; }
+    .toc ol{
+      display:flex;
+      overflow-x:auto;
+      gap:0.25rem;
+      padding:0.6rem 1.5rem;
+      scrollbar-width:none;
+    }
+    .toc ol::-webkit-scrollbar{ display:none; }
+    .toc a{
+      white-space:nowrap;
+      border-left:none;
+      border-bottom:2px solid transparent;
+      padding:0.3rem 0.15rem;
+      font-size:0.8rem;
+    }
+    .toc a.is-active{ border-bottom-color:var(--accent); }
+    main{ padding-top:2.5rem; }
+    .section{ margin-bottom:3rem; }
+    .colophon{ padding:1.75rem 1.5rem; }
+  }
+
+  /* ---------- a11y & print ---------- */
+
+  a:focus-visible{
+    outline:2px solid var(--accent);
+    outline-offset:3px;
+    border-radius:2px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior:auto; }
+    *{ transition:none !important; animation:none !important; }
+  }
+
+  @media print{
+    body{ background:#fff; font-size:11pt; }
+    .toc{ display:none; }
+    .shell{ display:block; padding:0; max-width:none; }
+    main{ max-width:none; padding-top:1.5rem; }
+    .section{ break-inside:avoid; margin-bottom:1.75rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <p class="eyebrow">비바샘 UX TF · 결과 보고회</p>
+    <h1>UX 기준과 원칙</h1>
+    <p class="meta">
+      <span>2026. 07. 29.</span><i>|</i><span>양시피님 집무실</span>
+    </p>
+
+    <div class="thesis">
+      <p>결국은 본질이다.<br>본질은 <em>현장</em>, <em>사용자</em>, <em>데이터</em>다.</p>
+      <span class="attrib">— 양시피님의 대표 키워드 중</span>
+    </div>
+  </div>
+</header>
+
+<div class="shell">
+
+  <nav class="toc" aria-label="목차">
+    <p class="toc-title">목차</p>
+    <ol>
+      <li><a href="#s1">왜 지금 UX인가</a></li>
+      <li><a href="#s2">차별화에 대한 관점</a></li>
+      <li><a href="#s3">'서비스'로서의 이해</a></li>
+      <li><a href="#s4">공동 인식과 얼라인먼트</a></li>
+      <li><a href="#s5">데이터와 원칙</a></li>
+      <li><a href="#s6">BIS와 UX 라이팅</a></li>
+      <li><a href="#s7">일하는 방식</a></li>
+      <li><a href="#s8">비바샘 소회</a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+    <section class="section" id="s1">
+      <p class="section-label">관점</p>
+      <h2>왜 지금 UX인가</h2>
+      <ul>
+        <li>
+          효익보다 <strong>편익</strong>이 더 중요해진 시대다. 그만큼 UX의 중요성이 커졌다.
+          <span class="gloss">제공자가 정의한 가치(효익)보다, 사용자가 실제로 체감하는 편리함(편익)이 우선한다는 의미.</span>
+        </li>
+        <li>결국은 <strong>본질</strong>이다. 본질은 <strong>현장, 사용자, 데이터</strong>다.</li>
+        <li>본질로 돌아가자. <strong>사용자가 보고자 하는 것만 남기고 나머지는 덜어낸다</strong>는 생각으로 접근해야 한다.</li>
+        <li>많은 것을 보여주고 싶은 마음은 <strong>제공자의 맥락</strong>이지, 사용자의 맥락이 아니다.</li>
+      </ul>
+    </section>
+
+    <section class="section" id="s2">
+      <p class="section-label">차별화</p>
+      <h2>차별화에 대한 관점</h2>
+      <ul>
+        <li>현재 자사 서비스들은 대체로 <strong>미투(Me-too) 전략</strong>에 머물러 있다. 그것이 정답인지 되물어야 한다.</li>
+        <li>최근 논의에서 차별화의 관점이 앞서 나오는 경향이 있는데, <strong>차별화가 편익을 넘어서서는 안 된다.</strong></li>
+        <li>
+          서책에서 '한 권으로 끝내기(한끝)' 교재는 본질을 집요하게 고민하고 기획한 사례다.
+          <ul>
+            <li>교사가 <strong>시기와 무관하게 곧바로 수업에 쓸 수 있고</strong>, 아이들에게 <strong>가장 빠르고 쉽게 수업할 수 있는</strong> 교재였다.</li>
+            <li>이것이 곧 <strong>교사의 맥락이자 현장성</strong>이었다.</li>
+          </ul>
+        </li>
+      </ul>
+    </section>
+
+    <section class="section" id="s3">
+      <p class="section-label">서비스</p>
+      <h2>서책이 아닌 '서비스'로서의 이해</h2>
+      <ul>
+        <li>서책과 다른, <strong>'서비스'에 대한 이해</strong>와 <strong>시장 환경에 대한 이해</strong>가 무엇보다 중요해졌다.</li>
+        <li>서비스는 <strong>A/B 테스트가 가능하다.</strong> 그것도 쉽고 빠르게 할 수 있다.</li>
+        <li>서비스가 <strong>계속 개선되고 있다는 모습을 보여주는 것</strong> 자체도 중요하다. 그 기준은 <span class="criterion">기준 = 데이터</span></li>
+      </ul>
+    </section>
+
+    <section class="section" id="s4">
+      <p class="section-label">얼라인</p>
+      <h2>공동 인식과 얼라인먼트</h2>
+      <ul>
+        <li>이 서비스가 <strong>무엇을 지향할 것인가</strong>에 대한 공동 인식이 중요하다.</li>
+        <li>그래야 여러 직무가 R&amp;R 수준에 머무르지 않고, <strong>공통의 ROLE</strong>을 가지고 사일로 이슈를 해결할 수 있다.</li>
+        <li>
+          <strong>VISION &gt; ALIGNMENT &gt; R&amp;R &gt; SUPPORT</strong> 순서에서 핵심은 <strong>ALIGNMENT</strong>다.
+          <ul>
+            <li>얼라인 없는 R&amp;R은 <strong>역할만 분화되어 흩어지는 것</strong>에 지나지 않는다.</li>
+          </ul>
+        </li>
+        <li>여러 직무가 협업하고 공동으로 과업을 수행해야 하는 시대다. 따라서 <strong>직무에 따라 해석이 달라지지 않게 하는 방법</strong>이 중요하다.</li>
+        <li><strong>정보를 열어</strong> 공동의 인식점을 확보한 상태에서 일해야 한다.</li>
+      </ul>
+    </section>
+
+    <section class="section" id="s5">
+      <p class="section-label">기준</p>
+      <h2>데이터와 원칙</h2>
+      <ul>
+        <li>UX 조직은 여러 직무의 관계를 공동의 인식으로 모으고, 협업하면서 <strong>매 순간의 의사결정 기준을 잡는 일</strong>을 하게 될 것이다. 단, <strong>데이터에 기반하여.</strong></li>
+        <li>따라서 <strong>데이터는 회사 안에서 모두의 공동 데이터로 열려 있어야 한다.</strong></li>
+        <li>
+          UX 조직 신설과 협업을 통한 변화가 의미 있는 변화가 되려면 <strong>'원칙'</strong>이 중요하다.
+          <ul>
+            <li><strong>변화를 위한 변화</strong>가 되어서는 안 되며, 길을 잃지 않으려면 원칙이 필요하다.</li>
+            <li><strong>자기 논리에 빠지지 않기 위해서도</strong> 원칙이 필요하다. <span class="criterion">기준 = 데이터</span></li>
+          </ul>
+        </li>
+      </ul>
+    </section>
+
+    <section class="section" id="s6">
+      <p class="section-label">언어</p>
+      <h2>BIS와 UX 라이팅</h2>
+      <ul>
+        <li>현재 <strong>BIS(Brand Identity System)를 준비 중</strong>이며, 공동의 체계를 기반으로 진행한다.</li>
+        <li><strong>UX 라이팅과 메뉴명 카피라이팅</strong>도 중요한 영역이다.</li>
+        <li><strong>메뉴명은 브랜드가 아니다.</strong> 무조건 직관적이어야 하고, <strong>사용자의 목적과 예측에 부합</strong>해야 한다.</li>
+      </ul>
+    </section>
+
+    <section class="section" id="s7">
+      <p class="section-label">방식</p>
+      <h2>일하는 방식</h2>
+      <ul>
+        <li><strong>'같이 또 따로'</strong> — 기능이 아니라 <strong>업무 중심</strong>으로 생각하자.</li>
+        <li>교육이 아닌 <strong>다른 산업군의 서비스도 스터디</strong>하면서 <strong>집단 역량</strong>을 키우자.</li>
+      </ul>
+    </section>
+
+    <section class="section" id="s8">
+      <p class="section-label">현장</p>
+      <h2>비바샘 소회 <span style="font-family:var(--util);font-size:0.72rem;font-weight:400;color:var(--ink-faint);letter-spacing:0.06em;">한은희</span></h2>
+      <ul>
+        <li>그동안 사용자의 목소리를 <strong>서비스 운영자 관점</strong>에서 들어왔다. <strong>비어 있는 것</strong>에 대한 요구와 <strong>문제 발생</strong>에 대한 지적에 대응하며, <strong>채우기와 문제 해결</strong>의 방향으로 진행해 왔다.</li>
+        <li>
+          이제의 과제이자 지향점은 두 가지다.
+          <ol class="numbered">
+            <li>지금까지 <strong>채워진 것들을 잘 연결하는 것</strong></li>
+            <li>비바샘의 <strong>여러 협업 조직들과 UX에 대해 잘 얼라인</strong>하며 진행하는 것</li>
+          </ol>
+        </li>
+      </ul>
+    </section>
+
+  </main>
+</div>
+
+<footer class="colophon">
+  <p>본 문서는 UX TF 결과 보고회에서 공유된 UX 기준과 원칙을 정리한 것입니다.</p>
+  <p>내부 참고용 · 외부 공유 금지</p>
+</footer>
+
+<script>
+(function(){
+  var links = Array.prototype.slice.call(document.querySelectorAll('.toc a'));
+  var map = {};
+  var targets = [];
+
+  links.forEach(function(link){
+    var id = link.getAttribute('href').slice(1);
+    var el = document.getElementById(id);
+    if (el) { map[id] = link; targets.push(el); }
+  });
+
+  if (!('IntersectionObserver' in window) || !targets.length) return;
+
+  function setActive(id){
+    links.forEach(function(l){ l.classList.remove('is-active'); });
+    if (map[id]) {
+      map[id].classList.add('is-active');
+      map[id].setAttribute('aria-current', 'true');
+    }
+    links.forEach(function(l){
+      if (!l.classList.contains('is-active')) l.removeAttribute('aria-current');
+    });
+  }
+
+  var visible = {};
+  var observer = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      visible[entry.target.id] = entry.isIntersecting;
+    });
+    for (var i = 0; i < targets.length; i++){
+      if (visible[targets[i].id]) { setActive(targets[i].id); return; }
+    }
+  }, { rootMargin: '-15% 0px -70% 0px', threshold: 0 });
+
+  targets.forEach(function(t){ observer.observe(t); });
+  setActive(targets[0].id);
+})();
+</script>
+
+</body>
+</html>
